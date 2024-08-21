@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: JamFactory API
+  version: 1.0.0
+  description: API for creating jam production plans at JamFactory
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: ProductionPlans
+    description: Endpoints related to creating jam production plans.
+
+paths:
+  /jams/product-plan:
+    post:
+      tags:
+        - ProductionPlans
+      summary: Create a new jam production plan
+      operationId: createJamProductionPlan
+      requestBody:
+        description: Details of the production plan
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                planDate:
+                  type: string
+                  format: date
+                  example: "2024-09-01"
+                smallJamJars:
+                  type: integer
+                  example: 100
+                mediumJamJars:
+                  type: integer
+                  example: 50
+                largeJamJars:
+                  type: integer
+                  example: 20
+              required:
+                - planDate
+                - smallJamJars
+                - mediumJamJars
+                - largeJamJars
+      responses:
+        '201':
+          description: Production plan created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  planId:
+                    type: string
+                    example: "123e4567-e89b-12d3-a456-426614174000"
+        '422':
+          description: Business logic error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rejectReason:
+                    type: string
+                    example: "przekraczająca zdolność produkcyjna"
+        '501':
+          description: Not Implemented
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Not Implemented"
