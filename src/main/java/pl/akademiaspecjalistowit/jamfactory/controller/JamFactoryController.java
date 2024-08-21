@@ -11,7 +11,7 @@ public class JamFactoryController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/product-plan")
-    public void addProductionPlan(@RequestBody JamPlanProduktionRequestDto jamPlanProduktionRequestDto) {
-        ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED);
-        }
+    public ResponseEntity<String> addProductionPlan(@RequestBody JamPlanProduktionRequestDto jamPlanProduktionRequestDto) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("NOT_IMPLEMENTED");
+    }
 }
