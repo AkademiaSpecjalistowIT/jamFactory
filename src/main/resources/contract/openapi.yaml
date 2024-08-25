@@ -65,6 +65,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductionPlanErrorResponse'
 
+  /jars/order/update/{id}:
+    put:
+      tags:
+        - ProductionPlans
+      summary: Update the production plan based on the provided UUID
+      operationId: updateProductionPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the production plan to update
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '204':
+          description: Order updated successfully, no content returned
+        '501':
+          description: Not Implemented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotImplementedError'
+
 components:
   schemas:
     JamProductionPlanRequest:
