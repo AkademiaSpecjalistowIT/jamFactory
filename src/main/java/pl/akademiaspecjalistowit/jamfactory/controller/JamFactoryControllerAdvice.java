@@ -17,7 +17,7 @@ public class JamFactoryControllerAdvice {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<RejectResponse> handleTravelException(BusinessException e) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new RejectResponse(e.getMessage(), ErrorCode.BUSINEES_ERROR));
+                .body(new RejectResponse(e.getMessage(), ErrorCode.BUSINESS_ERROR));
     }
 
     @ExceptionHandler(ProductionException.class)
@@ -36,7 +36,7 @@ public class JamFactoryControllerAdvice {
     }
 
     enum ErrorCode {
-        BUSINEES_ERROR,
+        BUSINESS_ERROR,
         JAM_PRODUCTION_LIMIT_EXCEEDED
     }
 }
