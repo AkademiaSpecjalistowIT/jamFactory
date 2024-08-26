@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
+import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.configuration.EmbeddedPostgresConfiguration;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
@@ -15,7 +15,6 @@ import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionReposi
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import java.util.jar.JarException;
 
 import static org.assertj.core.api.Assertions.assertThat;
