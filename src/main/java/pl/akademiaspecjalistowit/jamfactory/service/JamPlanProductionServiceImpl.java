@@ -106,6 +106,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
         long more = howManyPlaceWeHave - moreThanMaxDeliveryCapacityPerDay;
 
+
         if (totalJamJarsForPlannedDay > maxDeliveryCapacityPerDay) {
             if (moreThanMaxDeliveryCapacityPerDay > howManyPlaceWeHave) {
                 throw new ProductionException("przekraczajaca zdolnośc transportowa. Mamy mejsce tylko na " + more);
