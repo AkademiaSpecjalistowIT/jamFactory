@@ -13,3 +13,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+max-delivery-capacity:
+  maxDeliveryCapacity: 15 000

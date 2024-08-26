@@ -18,6 +18,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     @Override
     public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         JamPlanProductionEntity entity = jamsMapper.toEntity(jamPlanProductionRequestDto);
+
         jamPlanProductionRepository.save(entity);
         return entity.getPlanId();
     }
