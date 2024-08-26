@@ -2,6 +2,7 @@ package pl.akademiaspecjalistowit.jamfactory.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.akademiaspecjalistowit.jamfactory.dto.*;
 import pl.akademiaspecjalistowit.jamfactory.service.JamPlanProductionService;
@@ -22,7 +23,7 @@ public class JamFactoryController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/product-plan")
-    public ResponseEntity<String> findProductionPlan(@RequestBody JamPlanProduktionRequestDto jamPlanProduktionRequestDto) {
+    public ResponseEntity<String> findProductionPlan(@RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("NOT_IMPLEMENTED");
     }
 }
