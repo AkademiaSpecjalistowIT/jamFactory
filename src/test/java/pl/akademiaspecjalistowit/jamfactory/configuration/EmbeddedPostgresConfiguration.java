@@ -38,7 +38,7 @@ public class EmbeddedPostgresConfiguration {
     }
 
     @Bean
-    public JamsMapper jamsMapper(){
+    public JamsMapper jamsMapper() {
         return new JamsMapper();
     }
 
@@ -50,5 +50,10 @@ public class EmbeddedPostgresConfiguration {
             }
             embeddedPostgres.close();
         }
+    }
+
+    @Bean
+    public ApiProperties apiProperties() {
+        return new ApiProperties();
     }
 }
