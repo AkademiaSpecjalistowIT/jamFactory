@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import pl.akademiaspecjalistowit.jamfactory.dto.*;
 import pl.akademiaspecjalistowit.jamfactory.service.JamPlanProductionService;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -23,7 +25,12 @@ public class JamFactoryController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/product-plan")
-    public ResponseEntity<String> findProductionPlan(@RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("NOT_IMPLEMENTED");
+    public ProductionPlanForecastDto findProductionPlan(@RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+        return new ProductionPlanForecastDto(
+                List.of(
+                    new JamPlanProductionResponseDto(100,100,100, LocalDate.of(2024,8,29)),
+                    new JamPlanProductionResponseDto(100,100,100, LocalDate.of(2024,8,30)),
+                    new JamPlanProductionResponseDto(100,100,100, LocalDate.of(2024,8,31))),
+                new JamQuantityDto(300,300,300));
     }
 }
