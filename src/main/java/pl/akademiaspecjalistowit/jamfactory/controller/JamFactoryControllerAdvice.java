@@ -37,6 +37,6 @@ public class JamFactoryControllerAdvice {
 
     enum ErrorCode {
         BUSINESS_ERROR,
-        JAM_PRODUCTION_LIMIT_EXCEEDED,
+        JAM_PRODUCTION_LIMIT_EXCEEDED
     }
 }
