@@ -94,7 +94,7 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_throw_exception_with_add_new_plan_when_capacity_was_full2() {
+    void should_throw_exception_with_add_new_plan_when_capacity_was_full() {
         //GIVEN
         LocalDate plan_date = LocalDate.now().plusDays(1);
         LocalDate plan_date2 = LocalDate.now();
