@@ -1,5 +1,6 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -38,6 +39,11 @@ class JamPlanProductionServiceImplTest {
     @Autowired
     private JamPlanProductionRepository jamPlanProductionRepository;
 
+    @AfterEach
+    void tearDown() {
+        jamPlanProductionRepository.deleteAll();
+    }
+
     @Test
     void should_create_product_plan() {
         //GIVEN
@@ -72,20 +78,42 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_throw_exception_with_add_new_plan_when_capacity_was_full() {
+    void should_throw_exception_with_incorect_capacity() {
         //GIVEN
         LocalDate plan_date = LocalDate.now().plusDays(1);
-        Integer jars = 10000;
+        Integer jars = 1000;
+
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
                 jars, jars, jars);
 
-        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
-
-        JamPlanProductionRequestDto jamPlanProductionRequestDto2 = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
-                LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS);
-
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
+
+        //THEN
+        assertThrows(ProductionException.class, e);
+    }
+
+    @Test
+    void should_throw_exception_with_add_new_plan_when_capacity_was_full2() {
+        //GIVEN
+        LocalDate plan_date = LocalDate.now().plusDays(1);
+        LocalDate plan_date2 = LocalDate.now();
+
+        Integer jars_s = 5000;
+        Integer jars_m = 5000;
+        Integer jars_l = 5000;
+        Integer jars = 7000;
+
+        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
+                jars_s, jars_m, jars);
+
+        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
+
+        JamPlanProductionRequestDto jamPlanProductionRequestDto2 = new JamPlanProductionRequestDto(plan_date2,
+                jars_s, jars_m, jars_l);
+
+        //WHEN
+        Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto2);
 
         //THEN
         assertThrows(ProductionException.class, e);

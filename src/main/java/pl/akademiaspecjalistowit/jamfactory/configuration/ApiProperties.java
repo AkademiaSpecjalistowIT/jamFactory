@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "max-delivery-capacity")
+@ConfigurationProperties(prefix = "limits")
 @Component
 public class ApiProperties {
     private Integer maxDeliveryCapacity;
