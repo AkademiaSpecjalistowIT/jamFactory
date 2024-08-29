@@ -1,4 +1,4 @@
-package pl.akademiaspecjalistowit.jamfactory;
+package pl.akademiaspecjalistowit.jamfactory.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

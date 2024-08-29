@@ -1,7 +1,7 @@
 package pl.akademiaspecjalistowit.jamfactory.mapper;
 
 import org.springframework.stereotype.Component;
-import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
+import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 
 @Component

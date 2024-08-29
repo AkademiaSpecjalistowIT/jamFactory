@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.testcontainers.utility.DockerImageName;
-import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
+import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 import pl.akademiaspecjalistowit.jamfactory.service.JamPlanProductionService;
@@ -32,12 +32,13 @@ public class EmbeddedPostgresConfiguration {
     }
 
     @Bean
-    public JamPlanProductionService jamPlanProductionService(JamPlanProductionRepository jamPlanProductionRepository, JamsMapper jamsMapper) {
-        return new JamPlanProductionServiceImpl(jamPlanProductionRepository, jamsMapper);
+    public JamPlanProductionService jamPlanProductionService(JamPlanProductionRepository jamPlanProductionRepository,
+                                                             JamsMapper jamsMapper, ApiProperties apiProperties) {
+        return new JamPlanProductionServiceImpl(jamPlanProductionRepository, jamsMapper, apiProperties);
     }
 
     @Bean
-    public JamsMapper jamsMapper(){
+    public JamsMapper jamsMapper() {
         return new JamsMapper();
     }
 
@@ -49,5 +50,10 @@ public class EmbeddedPostgresConfiguration {
             }
             embeddedPostgres.close();
         }
+    }
+
+    @Bean
+    public ApiProperties apiProperties() {
+        return new ApiProperties();
     }
 }
