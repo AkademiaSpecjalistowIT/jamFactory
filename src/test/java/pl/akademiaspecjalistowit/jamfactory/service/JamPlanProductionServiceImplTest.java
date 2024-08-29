@@ -78,10 +78,10 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_throw_exception_with_incorect_capacity() {
+    void should_throw_exception_with_incorrect_capacity() {
         //GIVEN
         LocalDate plan_date = LocalDate.now().plusDays(1);
-        Integer jars = 1000;
+        Integer jars = 11000;
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
                 jars, jars, jars);
