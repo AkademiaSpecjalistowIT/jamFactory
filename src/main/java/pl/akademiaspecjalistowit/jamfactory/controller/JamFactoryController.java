@@ -1,5 +1,6 @@
 package pl.akademiaspecjalistowit.jamfactory.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class JamFactoryController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/product-plan")
-    public UUID addProductionPlan(@RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+    public UUID addProductionPlan( @RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         return jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
     }
 

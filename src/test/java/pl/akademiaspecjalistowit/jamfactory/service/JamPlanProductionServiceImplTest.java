@@ -1,5 +1,6 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +11,14 @@ import org.springframework.test.context.ContextConfiguration;
 import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.configuration.EmbeddedPostgresConfiguration;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
-import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
+import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
-import java.util.jar.JarException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ExtendWith(EmbeddedPostgresConfiguration.EmbeddedPostgresExtension.class)
@@ -37,20 +37,47 @@ class JamPlanProductionServiceImplTest {
     @Autowired
     private JamPlanProductionRepository jamPlanProductionRepository;
 
-    @Autowired
-    private JamsMapper jamsMapper;
+    //@Autowired
+    //private JamsMapper jamsMapper;
+
+    @AfterEach
+    void tearDown() {
+        jamPlanProductionRepository.deleteAll();
+    }
 
     @Test
-    void should_create_product_plan() throws JarException {
-        //GIVEN
-        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
+    void should_create_product_plan() {
+        // GIVEN
+        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(
+                CORRECT_PLAN_DATE, 0, 0, CORRECT_QUANTITY_JAM_JARS
+        );
+        // WHEN
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
-
-        //WHEN
+        // THEN
         List<JamPlanProductionEntity> all = jamPlanProductionRepository.findAll();
-
-        //THEN
         assertThat(all).isNotNull();
         assertThat(all.size()).isEqualTo(1);
+    }
+
+    @Test
+    void should_throw_exception_when_limit_exceeded() {
+        // GIVEN
+        JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
+                CORRECT_PLAN_DATE, 0, 0, 1500
+        );
+        jamPlanProductionService.addProductionPlan(requestDto1);
+
+        JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
+                CORRECT_PLAN_DATE, 0, 0, 600
+        );
+
+        // WHEN & THEN
+        ProductionException thrownException = assertThrows(
+                ProductionException.class,
+                () -> jamPlanProductionService.addProductionPlan(requestDto2),
+                "Expected addProductionPlan() to throw, but it didn't"
+        );
+
+        assertThat(thrownException.getMessage()).contains("Przekroczono limit produkcyjny");
     }
 }

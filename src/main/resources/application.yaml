@@ -1,7 +1,6 @@
 spring:
   application:
     name: jamFactory
-
   datasource:
     url: jdbc:postgresql://localhost:5440/jam_factory
     username: postgres
@@ -13,3 +12,5 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+limits:
+  maxProductionLimit: 2000

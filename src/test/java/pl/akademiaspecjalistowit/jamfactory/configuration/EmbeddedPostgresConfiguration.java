@@ -32,12 +32,17 @@ public class EmbeddedPostgresConfiguration {
     }
 
     @Bean
-    public JamPlanProductionService jamPlanProductionService(JamPlanProductionRepository jamPlanProductionRepository, JamsMapper jamsMapper) {
-        return new JamPlanProductionServiceImpl(jamPlanProductionRepository, jamsMapper);
+    public JamPlanProductionService jamPlanProductionService(JamPlanProductionRepository jamPlanProductionRepository, JamsMapper jamsMapper, ApiProperties apiProperties) {
+        return new JamPlanProductionServiceImpl(jamPlanProductionRepository, jamsMapper, apiProperties);
     }
 
     @Bean
-    public JamsMapper jamsMapper(){
+    public ApiProperties apiProperties() {
+        return new ApiProperties();
+    }
+
+    @Bean
+    public JamsMapper jamsMapper() {
         return new JamsMapper();
     }
 

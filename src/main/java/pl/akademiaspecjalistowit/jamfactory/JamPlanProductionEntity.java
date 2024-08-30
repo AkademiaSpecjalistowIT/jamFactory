@@ -33,10 +33,24 @@ public class JamPlanProductionEntity {
     private Integer largeJamJars;
 
     public JamPlanProductionEntity(LocalDate planDate, Integer smallJamJars, Integer mediumJamJars, Integer largeJamJars) {
+        this.smallJamJars = smallJamJars == null ? 0:smallJamJars;
+        this.largeJamJars = largeJamJars == null ? 0:largeJamJars;
+        this.mediumJamJars = mediumJamJars == null ? 0:mediumJamJars;
         this.planId = UUID.randomUUID();
         this.planDate = planDate;
-        this.smallJamJars = smallJamJars;
-        this.mediumJamJars = mediumJamJars;
-        this.largeJamJars = largeJamJars;
+    }
+    public double getTotalJamWeight(){
+        return (JarSizes.LARGE.value * largeJamJars) + (JarSizes.MEDIUM.value * mediumJamJars) + (JarSizes.SMALL.value * smallJamJars);
+    }
+    private enum JarSizes{
+
+        LARGE(1),
+        MEDIUM(0.5),
+        SMALL(0.25);
+        private final double value;
+
+        JarSizes(double value) {
+            this.value = value;
+        }
     }
 }
