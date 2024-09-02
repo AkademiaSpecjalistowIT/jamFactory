@@ -1,5 +1,7 @@
 package pl.akademiaspecjalistowit.jamfactory.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -8,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.testcontainers.utility.DockerImageName;
+import pl.akademiaspecjalistowit.jamfactory.controller.httpclient.JarClientService;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
@@ -23,25 +26,6 @@ import java.io.IOException;
 public class EmbeddedPostgresConfiguration {
     private static EmbeddedPostgres embeddedPostgres;
 
-    @Bean
-    public DataSource dataSource() throws IOException {
-        embeddedPostgres = EmbeddedPostgres.builder()
-                .setImage(DockerImageName.parse("postgres:14.1"))
-                .start();
-        return embeddedPostgres.getPostgresDatabase();
-    }
-
-    @Bean
-    public JamPlanProductionService jamPlanProductionService(JamPlanProductionRepository jamPlanProductionRepository,
-                                                             JamsMapper jamsMapper, ApiProperties apiProperties) {
-        return new JamPlanProductionServiceImpl(jamPlanProductionRepository, jamsMapper, apiProperties);
-    }
-
-    @Bean
-    public JamsMapper jamsMapper() {
-        return new JamsMapper();
-    }
-
     public static class EmbeddedPostgresExtension implements AfterAllCallback {
         @Override
         public void afterAll(ExtensionContext context) throws Exception {
@@ -53,7 +37,39 @@ public class EmbeddedPostgresConfiguration {
     }
 
     @Bean
+    public DataSource dataSource() throws IOException {
+        embeddedPostgres = EmbeddedPostgres.builder()
+                .setImage(DockerImageName.parse("postgres:14.1"))
+                .start();
+        return embeddedPostgres.getPostgresDatabase();
+    }
+
+    @Bean
+    public JamPlanProductionService jamPlanProductionService(JamPlanProductionRepository jamPlanProductionRepository,
+                                                             JamsMapper jamsMapper, ApiProperties apiProperties,
+                                                             JarClientService jarClientService) {
+        return new JamPlanProductionServiceImpl(jamPlanProductionRepository, jamsMapper, apiProperties, jarClientService);
+    }
+
+    @Bean
+    public JamsMapper jamsMapper() {
+        return new JamsMapper();
+    }
+
+    @Bean
     public ApiProperties apiProperties() {
         return new ApiProperties();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
+    }
+
+    @Bean
+    public JarClientService jarClientService(ObjectMapper objectMapper) {
+        return new JarClientService(objectMapper);
     }
 }
