@@ -17,6 +17,6 @@ spring:
 limits:
   maxDeliveryCapacity: 15000
 
-jar-fctory:
+jar-factory:
   paths:
     orders: http://localhost:8081/api/v1/jars/order

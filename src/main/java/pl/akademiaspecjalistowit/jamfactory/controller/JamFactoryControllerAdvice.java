@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import pl.akademiaspecjalistowit.jamfactory.exception.BusinessException;
 import pl.akademiaspecjalistowit.jamfactory.exception.JarException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
+import pl.akademiaspecjalistowit.jamfactory.httpclient.JarFactoryHttpClientException;
 
 @ControllerAdvice
 public class JamFactoryControllerAdvice {
@@ -27,8 +28,8 @@ public class JamFactoryControllerAdvice {
                 .body(new RejectResponse(e.getMessage(), ErrorCode.JAM_PRODUCTION_LIMIT_EXCEEDED));
     }
 
-    @ExceptionHandler(JarException.class)
-    public ResponseEntity<RejectResponse> handleJarException(JarException e) {
+    @ExceptionHandler(JarFactoryHttpClientException.class)
+    public ResponseEntity<RejectResponse> handleJarFactoryHttpClientException(JarFactoryHttpClientException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new RejectResponse(e.getMessage(), ErrorCode.INSUFFICIENT_JARS));
     }
