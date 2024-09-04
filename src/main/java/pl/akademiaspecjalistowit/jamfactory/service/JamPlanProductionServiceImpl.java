@@ -1,10 +1,6 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
 import jakarta.transaction.Transactional;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
@@ -14,6 +10,11 @@ import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -35,9 +36,9 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     }
 
     private void createJarOrder(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
-        JarOrderRequestDto jarOrderRequestDto = new JarOrderRequestDto(LocalDate.now().plusDays(1),
-            jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
-            jamPlanProductionRequestDto.getLargeJamJars());
+        JarOrderRequestDto jarOrderRequestDto = new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
+                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
+                jamPlanProductionRequestDto.getLargeJamJars());
 
         UUID jarOrderRequestId = jarService.orderJars(jarOrderRequestDto);
     }
@@ -49,15 +50,15 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         Integer maxDeliveryCapacityPerDay = apiProperties.getMaxDeliveryCapacity();
 
         Integer totalJamJarsForPlannedDay = jamPlanProductionRequestDto.getSmallJamJars() +
-            jamPlanProductionRequestDto.getMediumJamJars() +
-            jamPlanProductionRequestDto.getLargeJamJars();
+                jamPlanProductionRequestDto.getMediumJamJars() +
+                jamPlanProductionRequestDto.getLargeJamJars();
 
         List<JamPlanProductionEntity> existingPlans = jamPlanProductionRepository.findAll();
 
         LocalDate latestPlanDate = existingPlans.stream()
-            .map(JamPlanProductionEntity::getPlanDate)
-            .max(LocalDate::compareTo)
-            .orElse(plannedPlanDate);
+                .map(JamPlanProductionEntity::getPlanDate)
+                .max(LocalDate::compareTo)
+                .orElse(plannedPlanDate);
 
         if (plannedPlanDate.isAfter(latestPlanDate)) {
             checkUntilDate = plannedPlanDate;
@@ -66,9 +67,9 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         }
 
         Integer totalJarsFromTodayToCheckDate = existingPlans.stream()
-            .filter(plan -> !plan.getPlanDate().isBefore(today) && !plan.getPlanDate().isAfter(checkUntilDate))
-            .mapToInt(plan -> plan.getSmallJamJars() + plan.getMediumJamJars() + plan.getLargeJamJars())
-            .sum();
+                .filter(plan -> !plan.getPlanDate().isBefore(today) && !plan.getPlanDate().isAfter(checkUntilDate))
+                .mapToInt(plan -> plan.getSmallJamJars() + plan.getMediumJamJars() + plan.getLargeJamJars())
+                .sum();
 
         if (!plannedPlanDate.isBefore(today) && !plannedPlanDate.isAfter(checkUntilDate)) {
             totalJarsFromTodayToCheckDate += totalJamJarsForPlannedDay;
@@ -79,7 +80,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
         if (totalJarsFromTodayToCheckDate > maxCapacityInRange) {
             throw new ProductionException(
-                "Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
+                    "Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
         }
     }
 }

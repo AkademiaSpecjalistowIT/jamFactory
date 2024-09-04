@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -17,10 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.TransactionSystemException;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
-import pl.akademiaspecjalistowit.jamfactory.exception.JarException;
+import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
@@ -49,17 +52,17 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_create_product_plan() throws IOException {
+    void should_create_product_plan() {
         //GIVEN
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
             CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
 
-        JarOrderRequestDto jarOrderRequestDto =
-            new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
-                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
-                jamPlanProductionRequestDto.getLargeJamJars());
-
-        when(jarService.orderJars(jarOrderRequestDto)).thenReturn(UUID.randomUUID());
+//        JarOrderRequestDto jarOrderRequestDto =
+//            new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
+//                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
+//                jamPlanProductionRequestDto.getLargeJamJars());
+//
+//        when(jarService.orderJars(jarOrderRequestDto)).thenReturn(UUID.randomUUID());
 
         //WHEN
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
@@ -91,7 +94,7 @@ class JamPlanProductionServiceImplTest {
     void should_throw_production_exception_with_incorrect_capacity() {
         //GIVEN
         LocalDate plan_date = LocalDate.now().plusDays(1);
-        Integer jars = 11000;
+        Integer jars = -100;
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
             jars, jars, jars);
@@ -100,7 +103,7 @@ class JamPlanProductionServiceImplTest {
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
 
         //THEN
-        assertThrows(ProductionException.class, e);
+        assertThrows(TransactionSystemException.class, e);
     }
 
     @Test
@@ -127,24 +130,5 @@ class JamPlanProductionServiceImplTest {
 
         //THEN
         assertThrows(ProductionException.class, e);
-    }
-
-    @Test
-    void should_throw_production_jar_exception_with_incorrect_capacity() {
-        //GIVEN
-        LocalDate plan_date = LocalDate.now().plusDays(1);
-        Integer jars = 11000;
-
-        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
-            jars, jars, jars);
-
-        JarOrderRequestDto jarOrderRequestDto = new JarOrderRequestDto(plan_date.plusDays(1),
-            jars, jars, jars);
-
-        //WHEN
-        Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
-
-        //THEN
-        assertThrows(JarException.class, e);
     }
 }

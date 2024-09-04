@@ -1,17 +1,14 @@
 package pl.akademiaspecjalistowit.jamfactory.httpclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
+
 import java.net.http.HttpResponse;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.akademiaspecjalistowit.jamfactory.configuration.JarFactoryHttpConnections;
 import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 
 @Component
 @AllArgsConstructor
