@@ -1,20 +1,17 @@
 package pl.akademiaspecjalistowit.jamfactory.controller;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.TransactionSystemException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import pl.akademiaspecjalistowit.jamfactory.exception.BusinessException;
-import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
-
-import java.util.stream.Collectors;
+import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 
 @ControllerAdvice
 public class JamFactoryControllerAdvice {
@@ -37,19 +34,19 @@ public class JamFactoryControllerAdvice {
                 .body(new RejectResponse(e.getMessage(), ErrorCode.INSUFFICIENT_JARS));
     }
 
-    @ExceptionHandler(TransactionSystemException.class)
-    public ResponseEntity<RejectResponse> handleValidationExceptions(TransactionSystemException ex) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<RejectResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new RejectResponse(ex.getMessage(), ErrorCode.PRECONDITION_FAILED));
     }
 
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public ResponseEntity<RejectResponse> handleConstraintViolationException(IllegalArgumentException e) {
+//    @ExceptionHandler(ConstraintViolationException.class)
+//    public ResponseEntity<RejectResponse> handleConstraintViolationException(ConstraintViolationException e) {
 //        String errors = e.getConstraintViolations().stream()
 //                .map(error -> error.getMessageTemplate())
 //                .collect(Collectors.joining("\n"));
 //        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(new RejectResponse(errors, ErrorCode.INSUFFICIENT_JARS));
+//                .body(new RejectResponse(errors, ErrorCode. PRECONDITION_FAILED));
 //    }
 
     @Getter

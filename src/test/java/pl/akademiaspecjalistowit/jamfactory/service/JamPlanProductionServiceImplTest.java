@@ -57,12 +57,12 @@ class JamPlanProductionServiceImplTest {
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
             CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
 
-//        JarOrderRequestDto jarOrderRequestDto =
-//            new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
-//                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
-//                jamPlanProductionRequestDto.getLargeJamJars());
-//
-//        when(jarService.orderJars(jarOrderRequestDto)).thenReturn(UUID.randomUUID());
+        JarOrderRequestDto jarOrderRequestDto =
+            new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
+                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
+                jamPlanProductionRequestDto.getLargeJamJars());
+
+        when(jarService.orderJars(jarOrderRequestDto)).thenReturn(UUID.randomUUID());
 
         //WHEN
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
