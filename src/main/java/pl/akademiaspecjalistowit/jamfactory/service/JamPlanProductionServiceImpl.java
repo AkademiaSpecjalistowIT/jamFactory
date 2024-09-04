@@ -143,19 +143,19 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
         setupDefaultQuantity(jamPlanProductionEntity);
         if (remainderProductionLimitKgThisPlan > 0) {
-            int round = (int) Math.round(Math.min(remainderLkg, remainderProductionLimitKgThisPlan) / JamPlanProductionEntity.getLargeWeight());
+            int round = (int) Math.round(Math.min(remainderLkg/ JamPlanProductionEntity.getLargeWeight(), remainderProductionLimitKgThisPlan) );
             jamPlanProductionEntity.setLargeJamJars(round);
             remainderLkg -= round;
             remainderProductionLimitKgThisPlan -= round;
         }
         if (remainderProductionLimitKgThisPlan > 0) {
-            int round = (int) Math.round(Math.min(remainderMkg, remainderProductionLimitKgThisPlan) / JamPlanProductionEntity.getMediumWeight());
+            int round = (int) Math.round(Math.min(remainderMkg/ JamPlanProductionEntity.getMediumWeight(), remainderProductionLimitKgThisPlan) );
             jamPlanProductionEntity.setMediumJamJars(round);
             remainderMkg -= round;
             remainderProductionLimitKgThisPlan -= round;
         }
         if (remainderProductionLimitKgThisPlan > 0) {
-            int round = (int) Math.round(Math.min(remainderSkg, remainderProductionLimitKgThisPlan) / JamPlanProductionEntity.getSmallWeight());
+            int round = (int) Math.round(Math.min(remainderSkg/ JamPlanProductionEntity.getSmallWeight(), remainderProductionLimitKgThisPlan) );
             jamPlanProductionEntity.setSmallJamJars(round);
             remainderSkg -= round;
             remainderProductionLimitKgThisPlan -= round;
@@ -178,19 +178,22 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             for (JamPlanProductionEntity entity : byPlanDate) {
 
                 if (remainderLkg > 0) {
-                    result = distributeOneOrderL(entity, Math.min(remainderLkg, remainderProductionLimitKgThisDay));
+                    //result = distributeOneOrderL(entity, Math.min(remainderLkg, remainderProductionLimitKgThisDay));
+                    result = distributeOneOrder(entity, Math.min(remainderLkg, remainderProductionLimitKgThisDay), "LAGRE");
                     remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
                     remainderLkg = remainderLkg - result;
                 }
 
                 if (remainderMkg > 0) {
-                    result = distributeOneOrderM(entity, Math.min(remainderMkg, remainderProductionLimitKgThisDay));
+                    //result = distributeOneOrderM(entity, Math.min(remainderMkg, remainderProductionLimitKgThisDay));
+                    result = distributeOneOrder(entity, Math.min(remainderMkg, remainderProductionLimitKgThisDay), "MEDIUM");
                     remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
                     remainderMkg = remainderMkg - result;
                 }
 
                 if (remainderSkg > 0) {
-                    result = distributeOneOrderS(entity, Math.min(remainderSkg, remainderProductionLimitKgThisDay));
+                    //result = distributeOneOrderS(entity, Math.min(remainderSkg, remainderProductionLimitKgThisDay));
+                    result = distributeOneOrder(entity, Math.min(remainderSkg, remainderProductionLimitKgThisDay), "SMALL");
                     remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
                     remainderSkg = remainderSkg - result;
                 }
@@ -223,5 +226,32 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
         jamPlanProductionEntity.setSmallJamJars(jamPlanProductionEntity.getSmallJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getSmallWeight()));
         return (int) Math.round(remainderKg / JamPlanProductionEntity.getSmallWeight());
+    }
+
+    private double distributeOneOrder(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg, String jarSize) {
+        double jarWeight;
+        int currentJars;
+
+        switch (jarSize) {
+            case "LARGE":
+                jarWeight = JamPlanProductionEntity.getLargeWeight();
+                currentJars = jamPlanProductionEntity.getLargeJamJars();
+                jamPlanProductionEntity.setLargeJamJars(currentJars + (int) Math.round(remainderKg / jarWeight));
+                break;
+            case "MEDIUM":
+                jarWeight = JamPlanProductionEntity.getMediumWeight();
+                currentJars = jamPlanProductionEntity.getMediumJamJars();
+                jamPlanProductionEntity.setMediumJamJars(currentJars + (int) Math.round(remainderKg / jarWeight));
+                break;
+            case "SMALL":
+                jarWeight = JamPlanProductionEntity.getSmallWeight();
+                currentJars = jamPlanProductionEntity.getSmallJamJars();
+                jamPlanProductionEntity.setSmallJamJars(currentJars + (int) Math.round(remainderKg / jarWeight));
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected jar size: " + jarSize);
+        }
+
+        return (int) Math.round(remainderKg / jarWeight);
     }
 }
