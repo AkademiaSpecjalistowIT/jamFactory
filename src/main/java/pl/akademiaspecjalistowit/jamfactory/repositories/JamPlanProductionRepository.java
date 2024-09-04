@@ -1,5 +1,6 @@
 package pl.akademiaspecjalistowit.jamfactory.repositories;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,9 @@ import org.springframework.data.jpa.repository.Query;
 @Repository
 public interface JamPlanProductionRepository extends JpaRepository<JamPlanProductionEntity, Long> {
     List<JamPlanProductionEntity> findAllByPlanDate(LocalDate now);
+
+    List<JamPlanProductionEntity> findAllByPlanDateBetween(LocalDate from, LocalDate to);
+
 
     @Query("SELECT j.planDate, SUM(CAST(j.smallJamJars AS double) * :smallWeight), SUM(CAST(j.mediumJamJars AS double) * :mediumWeight), SUM(CAST(j.largeJamJars AS double) * :largeWeight) " +
             "FROM JamPlanProductionEntity j " +
@@ -49,5 +53,5 @@ public interface JamPlanProductionRepository extends JpaRepository<JamPlanProduc
         return resultMap;
     }
 
-    List<JamPlanProductionEntity> findByPlanDate(LocalDate planDate);
+    Optional<JamPlanProductionEntity> findByPlanDate(LocalDate planDate);
 }

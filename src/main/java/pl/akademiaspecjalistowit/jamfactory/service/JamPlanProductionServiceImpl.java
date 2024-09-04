@@ -1,257 +1,132 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.*;
-
 @AllArgsConstructor
 @Service
-
+@Slf4j
 public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final JamPlanProductionRepository jamPlanProductionRepository;
     private final JamsMapper jamsMapper;
     private final ApiProperties apiProperties;
 
     @Override
-    @Transactional
     public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
-        JamPlanProductionEntity entity = jamsMapper.toEntity(jamPlanProductionRequestDto);
-        validateAddingNewProductionPlanPossibility(entity);
-        jamPlanProductionRepository.save(entity);
+        JamPlanProductionEntity entity =
+            jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
+        try {
+            addNewProductionPlanForGivenDay(entity);
+        } catch (ProductionException e) {
+            log.info("Procesujemy dodanie planu prodyjnego na więcej niż 1 dzien, ponieważ : " + e.getMessage());
+            addProductionPlanBeforeDeadline(entity);
+        }
         return entity.getPlanId();
     }
 
-    private void validateAddingNewProductionPlanPossibility(JamPlanProductionEntity entity) {
-
-        LocalDate newPlanDate = entity.getPlanDate();
-        List<JamPlanProductionEntity> allByDate = jamPlanProductionRepository.findAllByPlanDate(newPlanDate);
-
-        double totalActualSum = allByDate.stream()
-                .mapToDouble(JamPlanProductionEntity::getTotalJamWeight)
-                .sum();
-
-        double newTotal = totalActualSum + entity.getTotalJamWeight();
+    private void addNewProductionPlanForGivenDay(JamPlanProductionEntity newProductionPlan) {
         double maxProductionLimit = apiProperties.getMaxProductionLimit();
+        double totalJamWeight = newProductionPlan.getTotalJamWeight();
 
-        System.out.println("Total weight before adding: " + totalActualSum);
-        System.out.println("New plan weight: " + entity.getTotalJamWeight());
-        System.out.println("Total weight after adding: " + newTotal);
+        validateFittingNewProductionPlanInEmptyDay(maxProductionLimit, totalJamWeight);
 
+        LocalDate newPlanDate = newProductionPlan.getPlanDate();
+        JamPlanProductionEntity jamPlanProductionEntity = jamPlanProductionRepository.findByPlanDate(newPlanDate)
+            .map(e -> updateExistingPlan(newProductionPlan, maxProductionLimit, totalJamWeight, e))
+            .orElse(newProductionPlan);
+        jamPlanProductionRepository.save(jamPlanProductionEntity);
+    }
+
+    private JamPlanProductionEntity updateExistingPlan(JamPlanProductionEntity newProductionPlan,
+                                                       double maxProductionLimit, double totalJamWeight,
+                                                       JamPlanProductionEntity e) {
+        double newTotal = e.getTotalJamWeight() + newProductionPlan.getTotalJamWeight();
         if (newTotal > maxProductionLimit) {
-            double exceededLimit = newTotal - maxProductionLimit;
-            checkAbilityDistributeExcessLimitToPreviousDays(exceededLimit, entity);
-            //throw new ProductionException("Przekroczono limit produkcyjny o " + exceededLimit + " Kg");
+            double exceededLimit = totalJamWeight - maxProductionLimit;
+            throw new ProductionException(
+                "Przekroczono limit produkcyjny na wskazany dzien o " + exceededLimit + " Kg");
+        }
+        e.updatePlan(newProductionPlan);
+        return e;
+    }
+
+    private void validateFittingNewProductionPlanInEmptyDay(double maxProductionLimit, double totalJamWeight) {
+        if (totalJamWeight > maxProductionLimit) {
+            double exceededLimit = totalJamWeight - maxProductionLimit;
+            throw new ProductionException(
+                "Przekroczono limit produkcyjny na wskazany dzien o " + exceededLimit + " Kg");
         }
     }
 
 
-    private void checkAbilityDistributeExcessLimitToPreviousDays(double exceededLimit, JamPlanProductionEntity entity) {
+    private void addProductionPlanBeforeDeadline(JamPlanProductionEntity newProductionPlan) {
+        LocalDate today = LocalDate.now();
 
-        Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod = jamPlanProductionRepository.
-                findAvailableProductionCapacityForSpecifiedPeriodWithEnum(LocalDate.now(), entity.getPlanDate());
+        List<JamPlanProductionEntity> allByPlanDateBetween =
+            jamPlanProductionRepository.findAllByPlanDateBetween(today, newProductionPlan.getPlanDate());
 
-        fillMissingDates(availableProductionCapacityForSpecifiedPeriod, LocalDate.now(), entity.getPlanDate());
-        for (Map.Entry<LocalDate, List<Double>> entry : availableProductionCapacityForSpecifiedPeriod.entrySet()) {
+        validateCapabilityForNewProductionPlan(newProductionPlan, today, allByPlanDateBetween);
 
-            if (entry.getValue().stream().mapToDouble(Double::doubleValue).sum() == 0) {
-                entry.setValue(List.of(entity.getSmallJamJars() * JamPlanProductionEntity.getSmallWeight(),
-                        entity.getMediumJamJars() * JamPlanProductionEntity.getMediumWeight(),
-                        entity.getLargeJamJars() * JamPlanProductionEntity.getLargeWeight()));
-            }
-        }
+        List<LocalDate> daySequenceDescending = createDaySequenceDescending(today, newProductionPlan.getPlanDate());
 
-        distributeAccordingPreviousPlans(availableProductionCapacityForSpecifiedPeriod, entity);
-    }
+        JamJars jars = new JamJars(newProductionPlan.getSmallJamJars(), newProductionPlan.getMediumJamJars(),
+            newProductionPlan.getLargeJamJars());
 
-    private void addDaysWithoutPlan(Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod, double remainderLkg, double remainderMkg, double remainderSkg) {
+        for (LocalDate day : daySequenceDescending) {
+            JamPlanProductionEntity jamPlanProductionEntity = allByPlanDateBetween.stream()
+                .filter(e -> e.getPlanDate().equals(day))
+                .findFirst()
+                .map(e -> e.fillProductionPlan(jars))
+                .orElseGet(() -> {
+                    JamPlanProductionEntity jppe =
+                        new JamPlanProductionEntity(day, apiProperties.getMaxProductionLimit());
+                    jppe.fillProductionPlan(jars);
+                    return jppe;
+                });
+            jamPlanProductionRepository.save(jamPlanProductionEntity);
 
-        for (Map.Entry<LocalDate, List<Double>> entry : availableProductionCapacityForSpecifiedPeriod.entrySet()) {
-
-            List<JamPlanProductionEntity> byPlanDate = jamPlanProductionRepository.findByPlanDate(entry.getKey());
-            if (!byPlanDate.isEmpty()) {
-                continue;
-            }
-
-            double remainderProductionLimitKgThisDay = apiProperties.getMaxProductionLimit();
-            double result = 0;
-            int newJamPlanJamL = 0;
-            int newJamPlanJamM = 0;
-            int newJamPlanJamS = 0;
-
-            if (remainderLkg > 0) {
-                result = Math.min(remainderLkg, remainderProductionLimitKgThisDay);
-                remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
-                remainderLkg = remainderLkg - result;
-                newJamPlanJamL = (int) Math.round(result / JamPlanProductionEntity.getLargeWeight());
-            }
-
-            if (remainderMkg > 0) {
-                result = Math.min(remainderMkg, remainderProductionLimitKgThisDay);
-                remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
-                remainderMkg = remainderMkg - result;
-                newJamPlanJamM = (int) Math.round(result / JamPlanProductionEntity.getMediumWeight());
-            }
-
-            if (remainderSkg > 0) {
-                result = Math.min(remainderSkg, remainderProductionLimitKgThisDay);
-                remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
-                remainderSkg = remainderSkg - result;
-                newJamPlanJamS = (int) Math.round(result / JamPlanProductionEntity.getSmallWeight());
-            }
-            if (newJamPlanJamL + newJamPlanJamM + newJamPlanJamS > 0) {
-                JamPlanProductionEntity newJamPlanProductionEntity = new JamPlanProductionEntity(entry.getKey(), newJamPlanJamL, newJamPlanJamM, newJamPlanJamS);
-                jamPlanProductionRepository.save(newJamPlanProductionEntity);
-            }
-        }
-        if (remainderSkg + remainderMkg + remainderLkg > 0) {
-            throw new ProductionException("Przekroczono limit produkcyjny o " + (remainderSkg + remainderMkg + remainderLkg) + " Kg");
-        }
-    }
-
-    public static void fillMissingDates(Map<LocalDate, List<Double>> productionCapacity, LocalDate dateFrom, LocalDate dateTo) {
-
-        LocalDate minDate = dateFrom;
-        LocalDate maxDate = dateTo;
-
-        LocalDate currentDate = minDate;
-        while (!currentDate.isAfter(maxDate)) {
-            productionCapacity.putIfAbsent(currentDate, new ArrayList<>());
-            currentDate = currentDate.plusDays(1);
-        }
-    }
-
-    private void distributeAccordingPreviousPlans(Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod, JamPlanProductionEntity jamPlanProductionEntity) {
-
-        double remainderSkg = jamPlanProductionEntity.getSmallJamJars() * JamPlanProductionEntity.getSmallWeight();
-        double remainderMkg = jamPlanProductionEntity.getMediumJamJars() * JamPlanProductionEntity.getMediumWeight();
-        double remainderLkg = jamPlanProductionEntity.getLargeJamJars() * JamPlanProductionEntity.getLargeWeight();
-
-        List<JamPlanProductionEntity> plansWithPlanDate = jamPlanProductionRepository.findByPlanDate(jamPlanProductionEntity.getPlanDate());
-        double remainderProductionLimitKgThisPlan = apiProperties.getMaxProductionLimit() - plansWithPlanDate.stream().mapToDouble(JamPlanProductionEntity::getTotalJamWeight).sum();
-
-        setupDefaultQuantity(jamPlanProductionEntity);
-        if (remainderProductionLimitKgThisPlan > 0) {
-            int round = (int) Math.round(Math.min(remainderLkg/ JamPlanProductionEntity.getLargeWeight(), remainderProductionLimitKgThisPlan) );
-            jamPlanProductionEntity.setLargeJamJars(round);
-            remainderLkg -= round;
-            remainderProductionLimitKgThisPlan -= round;
-        }
-        if (remainderProductionLimitKgThisPlan > 0) {
-            int round = (int) Math.round(Math.min(remainderMkg/ JamPlanProductionEntity.getMediumWeight(), remainderProductionLimitKgThisPlan) );
-            jamPlanProductionEntity.setMediumJamJars(round);
-            remainderMkg -= round;
-            remainderProductionLimitKgThisPlan -= round;
-        }
-        if (remainderProductionLimitKgThisPlan > 0) {
-            int round = (int) Math.round(Math.min(remainderSkg/ JamPlanProductionEntity.getSmallWeight(), remainderProductionLimitKgThisPlan) );
-            jamPlanProductionEntity.setSmallJamJars(round);
-            remainderSkg -= round;
-            remainderProductionLimitKgThisPlan -= round;
-        }
-
-        double result = 0;
-        if (remainderLkg + remainderMkg + remainderSkg <= 0) {
-            return;
-        }
-
-        for (Map.Entry<LocalDate, List<Double>> entry : availableProductionCapacityForSpecifiedPeriod.entrySet()) {
-
-            List<JamPlanProductionEntity> byPlanDate = jamPlanProductionRepository.findByPlanDate(entry.getKey());
-            double remainderProductionLimitKgThisDay = apiProperties.getMaxProductionLimit()
-                    - byPlanDate.stream().mapToDouble(JamPlanProductionEntity::getTotalJamWeight).sum()
-                    - (jamPlanProductionEntity.getPlanDate().equals(entry.getKey()) ? jamPlanProductionEntity.getTotalJamWeight() : 0.0);
-            if (remainderProductionLimitKgThisDay <= 0) {
-                continue;
-            }
-            for (JamPlanProductionEntity entity : byPlanDate) {
-
-                if (remainderLkg > 0) {
-                    //result = distributeOneOrderL(entity, Math.min(remainderLkg, remainderProductionLimitKgThisDay));
-                    result = distributeOneOrder(entity, Math.min(remainderLkg, remainderProductionLimitKgThisDay), "LAGRE");
-                    remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
-                    remainderLkg = remainderLkg - result;
-                }
-
-                if (remainderMkg > 0) {
-                    //result = distributeOneOrderM(entity, Math.min(remainderMkg, remainderProductionLimitKgThisDay));
-                    result = distributeOneOrder(entity, Math.min(remainderMkg, remainderProductionLimitKgThisDay), "MEDIUM");
-                    remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
-                    remainderMkg = remainderMkg - result;
-                }
-
-                if (remainderSkg > 0) {
-                    //result = distributeOneOrderS(entity, Math.min(remainderSkg, remainderProductionLimitKgThisDay));
-                    result = distributeOneOrder(entity, Math.min(remainderSkg, remainderProductionLimitKgThisDay), "SMALL");
-                    remainderProductionLimitKgThisDay = remainderProductionLimitKgThisDay - result;
-                    remainderSkg = remainderSkg - result;
-                }
-            }
-        }
-        if (remainderSkg + remainderMkg + remainderLkg > 0) {
-            addDaysWithoutPlan(availableProductionCapacityForSpecifiedPeriod, remainderLkg, remainderMkg, remainderSkg);
-        }
-    }
-
-    private static void setupDefaultQuantity(JamPlanProductionEntity jamPlanProductionEntity) {
-        jamPlanProductionEntity.setSmallJamJars(0);
-        jamPlanProductionEntity.setLargeJamJars(0);
-        jamPlanProductionEntity.setMediumJamJars(0);
-    }
-
-    private double distributeOneOrderL(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg) {
-
-        jamPlanProductionEntity.setLargeJamJars(jamPlanProductionEntity.getLargeJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getLargeWeight()));
-        return (int) Math.round(remainderKg / JamPlanProductionEntity.getLargeWeight());
-    }
-
-    private double distributeOneOrderM(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg) {
-
-        jamPlanProductionEntity.setMediumJamJars(jamPlanProductionEntity.getMediumJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getMediumWeight()));
-        return (int) Math.round(remainderKg / JamPlanProductionEntity.getMediumWeight());
-    }
-
-    private double distributeOneOrderS(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg) {
-
-        jamPlanProductionEntity.setSmallJamJars(jamPlanProductionEntity.getSmallJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getSmallWeight()));
-        return (int) Math.round(remainderKg / JamPlanProductionEntity.getSmallWeight());
-    }
-
-    private double distributeOneOrder(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg, String jarSize) {
-        double jarWeight;
-        int currentJars;
-
-        switch (jarSize) {
-            case "LARGE":
-                jarWeight = JamPlanProductionEntity.getLargeWeight();
-                currentJars = jamPlanProductionEntity.getLargeJamJars();
-                jamPlanProductionEntity.setLargeJamJars(currentJars + (int) Math.round(remainderKg / jarWeight));
+            if (jars.isEmpty()) {
                 break;
-            case "MEDIUM":
-                jarWeight = JamPlanProductionEntity.getMediumWeight();
-                currentJars = jamPlanProductionEntity.getMediumJamJars();
-                jamPlanProductionEntity.setMediumJamJars(currentJars + (int) Math.round(remainderKg / jarWeight));
-                break;
-            case "SMALL":
-                jarWeight = JamPlanProductionEntity.getSmallWeight();
-                currentJars = jamPlanProductionEntity.getSmallJamJars();
-                jamPlanProductionEntity.setSmallJamJars(currentJars + (int) Math.round(remainderKg / jarWeight));
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected jar size: " + jarSize);
+            }
         }
-
-        return (int) Math.round(remainderKg / jarWeight);
     }
+
+    private List<LocalDate> createDaySequenceDescending(LocalDate today, LocalDate newProductionPlanDate) {
+        //TODO
+        return List.of();
+    }
+
+    private void validateCapabilityForNewProductionPlan(JamPlanProductionEntity newProductionPlan, LocalDate today,
+                                                        List<JamPlanProductionEntity> allByPlanDateBetween) {
+        long factoryWorkingDaysUntilDeadline = getFactoryWorkingDaysUntilDeadline(newProductionPlan, today);
+
+        double maxProductionLimit = apiProperties.getMaxProductionLimit();
+        double maxFactoryProductionInKg = factoryWorkingDaysUntilDeadline * maxProductionLimit;
+
+        double plannedFactoryProductionInKg = allByPlanDateBetween.stream()
+            .mapToDouble(JamPlanProductionEntity::getTotalJamWeight)
+            .sum();
+
+        if (plannedFactoryProductionInKg + newProductionPlan.getTotalJamWeight() > maxFactoryProductionInKg) {
+            throw new ProductionException("Przekroczono limit produkcyjny fabryki do tego dnia");
+        }
+    }
+
+    private long getFactoryWorkingDaysUntilDeadline(JamPlanProductionEntity entity, LocalDate today) {
+        return Duration.between(today.atStartOfDay(),
+            entity.getPlanDate().atStartOfDay()).toDays() + 1;
+    }
+
 }

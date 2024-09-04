@@ -16,7 +16,7 @@ class JamPlanProductionEntityTest {
     @Test
     void ShouldConvertAllJamJarsToWeightCorrectly() {
         //given
-        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 10, 10, 10);
+        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 10, 10, 10,2000);
 
         //when
         double totalJamWeight = jamPlanProductionEntity.getTotalJamWeight();
@@ -28,7 +28,7 @@ class JamPlanProductionEntityTest {
     @Test
     void ShouldConvertAllJamJarsToWeightIgnoreMissingSmallJamJars() {
         //given
-        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), null, 10, 10);
+        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), null, 10, 10,2000);
 
         //when
         double totalJamWeight = jamPlanProductionEntity.getTotalJamWeight();
@@ -40,7 +40,7 @@ class JamPlanProductionEntityTest {
     @Test
     void ShouldConvertAllJamJarsToWeightIgnoreMissingMeidumJamJars() {
         //given
-        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 10, null, 10);
+        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 10, null, 10, 2000);
 
         //when
         double totalJamWeight = jamPlanProductionEntity.getTotalJamWeight();
@@ -52,7 +52,7 @@ class JamPlanProductionEntityTest {
     @Test
     void ShouldConvertAllJamJarsToWeightIgnoreMissingLargeJamJars() {
         //given
-        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 10, 10, null);
+        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 10, 10, null, 2000);
 
         //when
         double totalJamWeight = jamPlanProductionEntity.getTotalJamWeight();
@@ -60,4 +60,5 @@ class JamPlanProductionEntityTest {
         //then
         assertThat(totalJamWeight).isEqualTo(7.5);
     }
+
 }
