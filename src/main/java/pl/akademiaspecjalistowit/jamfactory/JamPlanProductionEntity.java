@@ -69,10 +69,10 @@ public class JamPlanProductionEntity {
     private enum JarSizes{
 
         LARGE(1),
-        //MEDIUM(0.5),
-        MEDIUM(1),
-        //SMALL(0.25);
-        SMALL(1);
+        MEDIUM(0.5),
+        //MEDIUM(1),
+        SMALL(0.25);
+        //SMALL(1);
         private final double value;
 
         JarSizes(double value) {
