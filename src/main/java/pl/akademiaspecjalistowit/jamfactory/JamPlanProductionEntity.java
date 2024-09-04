@@ -42,11 +42,37 @@ public class JamPlanProductionEntity {
     public double getTotalJamWeight(){
         return (JarSizes.LARGE.value * largeJamJars) + (JarSizes.MEDIUM.value * mediumJamJars) + (JarSizes.SMALL.value * smallJamJars);
     }
+    public static double getLargeWeight() {
+        return JarSizes.LARGE.value;
+    }
+
+    public static double getMediumWeight() {
+        return JarSizes.MEDIUM.value;
+    }
+
+    public static double getSmallWeight() {
+        return JarSizes.SMALL.value;
+    }
+
+    public void setSmallJamJars(Integer smallJamJars) {
+        this.smallJamJars = smallJamJars;
+    }
+
+    public void setMediumJamJars(Integer mediumJamJars) {
+        this.mediumJamJars = mediumJamJars;
+    }
+
+    public void setLargeJamJars(Integer largeJamJars) {
+        this.largeJamJars = largeJamJars;
+    }
+
     private enum JarSizes{
 
         LARGE(1),
-        MEDIUM(0.5),
-        SMALL(0.25);
+        //MEDIUM(0.5),
+        MEDIUM(1),
+        //SMALL(0.25);
+        SMALL(1);
         private final double value;
 
         JarSizes(double value) {
