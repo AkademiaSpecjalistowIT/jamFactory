@@ -55,24 +55,15 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             //throw new ProductionException("Przekroczono limit produkcyjny o " + exceededLimit + " Kg");
         }
     }
-    public List<LocalDate> generateDateRange(LocalDate startDate, LocalDate endDate) {
-        List<LocalDate> dates = new ArrayList<>();
-        LocalDate currentDate = startDate;
-        while (!currentDate.isAfter(endDate)) {
-            dates.add(currentDate);
-            currentDate = currentDate.plusDays(1);
-        }
-        return dates;
-    }
+
+
     private void checkAbilityDistributeExcessLimitToPreviousDays(double exceededLimit, JamPlanProductionEntity entity) {
-        List<LocalDate> localDates = generateDateRange(LocalDate.now(), entity.getPlanDate());
+
         Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod = jamPlanProductionRepository.
-                findAvailableProductionCapacityForSpecifiedPeriodWithEnum(LocalDate.now(), entity.getPlanDate(),
-                        entity.getSmallJamJars(), entity.getMediumJamJars(), entity.getLargeJamJars());
+                findAvailableProductionCapacityForSpecifiedPeriodWithEnum(LocalDate.now(), entity.getPlanDate());
+
         fillMissingDates(availableProductionCapacityForSpecifiedPeriod, LocalDate.now(), entity.getPlanDate());
         for (Map.Entry<LocalDate, List<Double>> entry : availableProductionCapacityForSpecifiedPeriod.entrySet()) {
-
-            //List<JamPlanProductionEntity> byPlanDate = jamPlanProductionRepository.findByPlanDate(entry.getKey());
 
             if (entry.getValue().stream().mapToDouble(Double::doubleValue).sum() == 0) {
                 entry.setValue(List.of(entity.getSmallJamJars() * JamPlanProductionEntity.getSmallWeight(),
@@ -81,34 +72,23 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             }
         }
 
-        double totalAvailableCapacity = availableProductionCapacityForSpecifiedPeriod.values().stream()
-                .flatMap(List::stream)
-                .mapToDouble(Double::doubleValue)
-                .sum();
-
-//        double deviationFactFromPlan = totalAvailableCapacity - exceededLimit;
-//        if (deviationFactFromPlan < 0) {
-//            throw new ProductionException("Przekroczono limit produkcyjny o " + deviationFactFromPlan + " Kg");
-//        }
         distributeAccordingPreviousPlans(availableProductionCapacityForSpecifiedPeriod, entity);
     }
 
-    private double addDaysWithoutPlan(Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod, double remainderLkg, double remainderMkg, double remainderSkg) {
-        //fillMissingDates(availableProductionCapacityForSpecifiedPeriod);
-        double sumNewCapacity = 0;
+    private void addDaysWithoutPlan(Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod, double remainderLkg, double remainderMkg, double remainderSkg) {
+
         for (Map.Entry<LocalDate, List<Double>> entry : availableProductionCapacityForSpecifiedPeriod.entrySet()) {
 
-            //List<JamPlanProductionEntity> byPlanDate = jamPlanProductionRepository.findByPlanDate(entry.getKey());
+            List<JamPlanProductionEntity> byPlanDate = jamPlanProductionRepository.findByPlanDate(entry.getKey());
+            if (!byPlanDate.isEmpty()) {
+                continue;
+            }
 
-//            if (entry.getValue().stream().mapToDouble(Double::doubleValue).sum() > 0) {
-//                continue;
-//            }
             double remainderProductionLimitKgThisDay = apiProperties.getMaxProductionLimit();
             double result = 0;
             int newJamPlanJamL = 0;
             int newJamPlanJamM = 0;
             int newJamPlanJamS = 0;
-            //for (JamPlanProductionEntity entity : byPlanDate) {
 
             if (remainderLkg > 0) {
                 result = Math.min(remainderLkg, remainderProductionLimitKgThisDay);
@@ -130,25 +110,18 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
                 remainderSkg = remainderSkg - result;
                 newJamPlanJamS = (int) Math.round(result / JamPlanProductionEntity.getSmallWeight());
             }
-            JamPlanProductionEntity newJamPlanProductionEntity = new JamPlanProductionEntity(entry.getKey(), newJamPlanJamL, newJamPlanJamM, newJamPlanJamS);
-            jamPlanProductionRepository.save(newJamPlanProductionEntity);
-            sumNewCapacity += remainderProductionLimitKgThisDay;
-            //}
+            if (newJamPlanJamL + newJamPlanJamM + newJamPlanJamS > 0) {
+                JamPlanProductionEntity newJamPlanProductionEntity = new JamPlanProductionEntity(entry.getKey(), newJamPlanJamL, newJamPlanJamM, newJamPlanJamS);
+                jamPlanProductionRepository.save(newJamPlanProductionEntity);
+            }
         }
         if (remainderSkg + remainderMkg + remainderLkg > 0) {
             throw new ProductionException("Przekroczono limit produkcyjny o " + (remainderSkg + remainderMkg + remainderLkg) + " Kg");
         }
-        return sumNewCapacity;
-
     }
 
     public static void fillMissingDates(Map<LocalDate, List<Double>> productionCapacity, LocalDate dateFrom, LocalDate dateTo) {
-//        if (productionCapacity.isEmpty()) {
-//            return;
-//        }
 
-//        LocalDate minDate = Collections.min(productionCapacity.keySet());
-//        LocalDate maxDate = Collections.max(productionCapacity.keySet());
         LocalDate minDate = dateFrom;
         LocalDate maxDate = dateTo;
 
@@ -160,7 +133,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     }
 
     private void distributeAccordingPreviousPlans(Map<LocalDate, List<Double>> availableProductionCapacityForSpecifiedPeriod, JamPlanProductionEntity jamPlanProductionEntity) {
-
 
         double remainderSkg = jamPlanProductionEntity.getSmallJamJars() * JamPlanProductionEntity.getSmallWeight();
         double remainderMkg = jamPlanProductionEntity.getMediumJamJars() * JamPlanProductionEntity.getMediumWeight();
@@ -227,7 +199,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         if (remainderSkg + remainderMkg + remainderLkg > 0) {
             addDaysWithoutPlan(availableProductionCapacityForSpecifiedPeriod, remainderLkg, remainderMkg, remainderSkg);
         }
-
     }
 
     private static void setupDefaultQuantity(JamPlanProductionEntity jamPlanProductionEntity) {
@@ -238,27 +209,19 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
     private double distributeOneOrderL(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg) {
 
-        double v = remainderKg;// - jamPlanProductionEntity.getLargeJamJars() * JamPlanProductionEntity.getLargeWeight();
-
-        jamPlanProductionEntity.setLargeJamJars(jamPlanProductionEntity.getLargeJamJars() + (int) Math.round(v / JamPlanProductionEntity.getLargeWeight()));
-
-        return (int) Math.round(v / JamPlanProductionEntity.getLargeWeight());
+        jamPlanProductionEntity.setLargeJamJars(jamPlanProductionEntity.getLargeJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getLargeWeight()));
+        return (int) Math.round(remainderKg / JamPlanProductionEntity.getLargeWeight());
     }
 
     private double distributeOneOrderM(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg) {
 
-        double v = remainderKg;// - jamPlanProductionEntity.getMediumJamJars() * JamPlanProductionEntity.getMediumWeight();
-
-        jamPlanProductionEntity.setMediumJamJars(jamPlanProductionEntity.getMediumJamJars() + (int) Math.round(v / JamPlanProductionEntity.getMediumWeight()));
-
-        return (int) Math.round(v / JamPlanProductionEntity.getMediumWeight());
+        jamPlanProductionEntity.setMediumJamJars(jamPlanProductionEntity.getMediumJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getMediumWeight()));
+        return (int) Math.round(remainderKg / JamPlanProductionEntity.getMediumWeight());
     }
 
     private double distributeOneOrderS(JamPlanProductionEntity jamPlanProductionEntity, double remainderKg) {
-        double v = remainderKg;// - jamPlanProductionEntity.getSmallJamJars() * JamPlanProductionEntity.getSmallWeight();
 
-        jamPlanProductionEntity.setSmallJamJars(jamPlanProductionEntity.getSmallJamJars() + (int) Math.round(v / JamPlanProductionEntity.getSmallWeight()));
-
-        return (int) Math.round(v / JamPlanProductionEntity.getSmallWeight());
+        jamPlanProductionEntity.setSmallJamJars(jamPlanProductionEntity.getSmallJamJars() + (int) Math.round(remainderKg / JamPlanProductionEntity.getSmallWeight()));
+        return (int) Math.round(remainderKg / JamPlanProductionEntity.getSmallWeight());
     }
 }

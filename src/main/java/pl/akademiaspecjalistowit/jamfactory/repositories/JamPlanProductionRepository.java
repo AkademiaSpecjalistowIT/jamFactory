@@ -21,48 +21,20 @@ public interface JamPlanProductionRepository extends JpaRepository<JamPlanProduc
             "FROM JamPlanProductionEntity j " +
             "WHERE j.planDate BETWEEN :dateFrom AND :dateTo " +
             "GROUP BY j.planDate " +
-            "HAVING SUM(CAST(j.smallJamJars AS double) * :smallWeight) <= :neededSmallWeight " +
-            "AND SUM(CAST(j.mediumJamJars AS double) * :mediumWeight) <= :neededMediumWeight " +
-            "AND SUM(CAST(j.largeJamJars AS double) * :largeWeight) <= :neededLargeWeight " +
             "ORDER BY j.planDate DESC")
-
-//    @Query("SELECT * FROM (" +
-//            "SELECT d.planDate, 0 AS totalSmallWeight, 0 AS totalMediumWeight, 0 AS totalLargeWeight " +
-//            "FROM (SELECT DISTINCT j.planDate " +
-//            "      FROM JamPlanProductionEntity j " +
-//            "      WHERE j.planDate BETWEEN :dateFrom AND :dateTo) d " +
-//            "LEFT JOIN JamPlanProductionEntity jp ON d.planDate = jp.planDate " +
-//            "WHERE jp.planDate IS NULL " +
-//            "UNION " +
-//            "SELECT j.planDate, " +
-//            "SUM(CAST(j.smallJamJars AS double) * :smallWeight) AS totalSmallWeight, " +
-//            "SUM(CAST(j.mediumJamJars AS double) * :mediumWeight) AS totalMediumWeight, " +
-//            "SUM(CAST(j.largeJamJars AS double) * :largeWeight) AS totalLargeWeight " +
-//            "FROM JamPlanProductionEntity j " +
-//            "WHERE j.planDate BETWEEN :dateFrom AND :dateTo " +
-//            "GROUP BY j.planDate " +
-//            "HAVING SUM(CAST(j.smallJamJars AS double) * :smallWeight) <= :neededSmallWeight " +
-//            "AND SUM(CAST(j.mediumJamJars AS double) * :mediumWeight) <= :neededMediumWeight " +
-//            "AND SUM(CAST(j.largeJamJars AS double) * :largeWeight) <= :neededLargeWeight) AS result " +
-//            "ORDER BY planDate DESC")
     List<Object[]> findAvailableProductionCapacityForSpecifiedPeriod(
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo,
             @Param("smallWeight") double smallWeight,
             @Param("mediumWeight") double mediumWeight,
-            @Param("largeWeight") double largeWeight,
-            @Param("neededSmallWeight") int neededSmallWeight,
-            @Param("neededMediumWeight") int neededMediumWeight,
-            @Param("neededLargeWeight") int neededLargeWeight);
+            @Param("largeWeight") double largeWeight);
 
-    default Map<LocalDate, List<Double>> findAvailableProductionCapacityForSpecifiedPeriodWithEnum(LocalDate dateFrom, LocalDate dateTo,
-                                                                                                   int neededSmallWeight, int neededMediumWeight, int neededLargeWeight) {
+    default Map<LocalDate, List<Double>> findAvailableProductionCapacityForSpecifiedPeriodWithEnum(LocalDate dateFrom, LocalDate dateTo) {
         List<Object[]> rawResults = findAvailableProductionCapacityForSpecifiedPeriod(
-                dateFrom, dateTo, JamPlanProductionEntity.getSmallWeight(), JamPlanProductionEntity.getMediumWeight(), JamPlanProductionEntity.getLargeWeight(),
-                neededSmallWeight, neededMediumWeight, neededLargeWeight
+                dateFrom, dateTo, JamPlanProductionEntity.getSmallWeight(), JamPlanProductionEntity.getMediumWeight(), JamPlanProductionEntity.getLargeWeight()
+
         );
 
-        // Преобразование результата в Map<LocalDate, List<Double>>
         Map<LocalDate, List<Double>> resultMap = new HashMap<>();
 
         for (Object[] row : rawResults) {
