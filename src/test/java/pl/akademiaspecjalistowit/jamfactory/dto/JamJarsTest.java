@@ -15,10 +15,11 @@ class JamJarsTest {
         JamJars jamJars = new JamJars(0, 0, 1000);
 
         //when
-        jamJars.borrowLarge(1000);
+        Integer borrowedLarge = jamJars.borrowLarge(1000);
 
         //then
-        assertThat(jamJars.isEmpty()).isTrue();
+        //assertThat(jamJars.isEmpty()).isTrue();
+        assertThat(borrowedLarge).isEqualTo(1000);
     }
 
 
@@ -28,10 +29,11 @@ class JamJarsTest {
         JamJars jamJars = new JamJars(1000, 0, 0);
 
         //when
-        jamJars.borrowSmall(1000);
+        Integer borrowedSmall = jamJars.borrowSmall(1000);
 
         //then
-        assertThat(jamJars.isEmpty()).isTrue();
+        //assertThat(jamJars.isEmpty()).isTrue();
+        assertThat(borrowedSmall).isEqualTo(1000);
     }
 
 
@@ -41,10 +43,11 @@ class JamJarsTest {
         JamJars jamJars = new JamJars(0, 1000, 0);
 
         //when
-        jamJars.borrowMedium(1000);
+        Integer borrowedMedium = jamJars.borrowMedium(1000);
 
         //then
-        assertThat(jamJars.isEmpty()).isTrue();
+        //assertThat(jamJars.isEmpty()).isTrue();
+        assertThat(borrowedMedium).isEqualTo(1000);
     }
 
     @Test
@@ -53,10 +56,24 @@ class JamJarsTest {
         JamJars jamJars = new JamJars(0, 1000, 0);
 
         //when
-        jamJars.borrowMedium(1200);
+        Integer borrowedMedium = jamJars.borrowMedium(1200);
 
         //then
-        assertThat(jamJars.isEmpty()).isTrue();
+        //assertThat(jamJars.isEmpty()).isTrue();
+        assertThat(borrowedMedium).isEqualTo(1000);
+    }
+
+    @Test
+    void should_empty_medium_jamJar2() {
+        //given
+        JamJars jamJars = new JamJars(0, 1000, 0);
+
+        //when
+        Integer borrowedMedium = jamJars.borrowMedium(500);
+
+        //then
+        //assertThat(jamJars.isEmpty()).isTrue();
+        assertThat(borrowedMedium).isEqualTo(500);
     }
 
 }

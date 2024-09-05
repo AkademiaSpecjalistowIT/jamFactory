@@ -11,27 +11,43 @@ public class JamJars {
     private Integer largeJamJars;
 
     public Integer borrowMedium(Integer amount) {
-        if (amount > this.mediumJamJars) {
-            return this.mediumJamJars;
+        if (amount >= this.mediumJamJars) {
+            return mediumJamJars;
         }
-        return mediumJamJars - amount;
+        return amount;
     }
 
     public Integer borrowSmall(Integer amount) {
         if (amount > this.smallJamJars) {
             return this.smallJamJars;
         }
-        return smallJamJars - amount;
+        return amount;
     }
 
     public Integer borrowLarge(Integer amount) {
         if (amount > this.largeJamJars) {
+//            Integer tempLarge = this.largeJamJars;
+//            updateLarge(largeJamJars);
             return largeJamJars;
         }
-        return largeJamJars - amount;
+//        Integer tempLarge = largeJamJars - amount;
+//        updateLarge(largeJamJars);
+        return amount;
     }
 
     public boolean isEmpty() {
         return smallJamJars + mediumJamJars + largeJamJars == 0;
+    }
+
+    public void updateLarge(int actuallyBorrowedLargeAmount) {
+        largeJamJars -= actuallyBorrowedLargeAmount;
+    }
+
+    public void updateMedium(int actuallyBorrowedLargeAmount) {
+        mediumJamJars -= actuallyBorrowedLargeAmount;
+    }
+
+    public void updateSmall(int actuallyBorrowedLargeAmount) {
+        smallJamJars -= actuallyBorrowedLargeAmount;
     }
 }
