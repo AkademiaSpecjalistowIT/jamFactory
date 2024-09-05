@@ -6,13 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class JamPlanProductionResponseDto extends JamQuantityDto {
-    private LocalDate productionDate;
-
-    public JamPlanProductionResponseDto(Integer smallJar, Integer mediumJar, Integer largeJar, LocalDate productionDate) {
-        super(smallJar, mediumJar, largeJar);
-        this.productionDate = productionDate;
-    }
+@AllArgsConstructor
+public class JamPlanProductionResponseDto {
+    private LocalDate planDate;
+    private Integer smallJamJars;
+    private Integer mediumJamJars;
+    private Integer largeJamJars;
 }

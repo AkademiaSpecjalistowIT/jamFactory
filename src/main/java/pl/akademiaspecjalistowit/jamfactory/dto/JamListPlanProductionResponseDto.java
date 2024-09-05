@@ -6,10 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ProductionPlanForecastDto {
-    private List<JamPlanProductionResponseDto> perDay;
-    private JamQuantityDto sum;
+@AllArgsConstructor
+public class JamListPlanProductionResponseDto {
+    private List<JamPlanProductionResponseDto> listPlans;
+    private Integer sumSmallJamJars;
+    private Integer sumMediumJamJars;
+    private Integer sumLargeJamJars;
 }

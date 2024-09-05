@@ -2,12 +2,12 @@ package pl.akademiaspecjalistowit.jamfactory.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.akademiaspecjalistowit.jamfactory.dto.*;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamListPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionResponseDto;
 import pl.akademiaspecjalistowit.jamfactory.service.JamPlanProductionService;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,12 +25,7 @@ public class JamFactoryController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/product-plan")
-    public ProductionPlanForecastDto findProductionPlan(@RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
-        return new ProductionPlanForecastDto(
-                List.of(
-                    new JamPlanProductionResponseDto(100,100,100, LocalDate.of(2024,8,29)),
-                    new JamPlanProductionResponseDto(100,100,100, LocalDate.of(2024,8,30)),
-                    new JamPlanProductionResponseDto(100,100,100, LocalDate.of(2024,8,31))),
-                new JamQuantityDto(300,300,300));
+    public JamListPlanProductionResponseDto findProductionPlan() {
+        return jamPlanProductionService.getPlanProduction();
     }
 }
