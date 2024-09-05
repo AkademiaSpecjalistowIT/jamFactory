@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
@@ -21,14 +22,25 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final JamPlanProductionRepository jamPlanProductionRepository;
     private final JamsMapper jamsMapper;
     private final ApiProperties apiProperties;
+    private final JarService jarService;
+
 
     @Transactional
     @Override
     public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         validateProductionPlan(jamPlanProductionRequestDto);
+        createJarOrder(jamPlanProductionRequestDto);
         JamPlanProductionEntity entity = jamsMapper.toEntity(jamPlanProductionRequestDto);
         jamPlanProductionRepository.save(entity);
         return entity.getPlanId();
+    }
+
+    private void createJarOrder(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+        JarOrderRequestDto jarOrderRequestDto = new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
+                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
+                jamPlanProductionRequestDto.getLargeJamJars());
+
+        UUID jarOrderRequestId = jarService.orderJars(jarOrderRequestDto);
     }
 
     private void validateProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
@@ -67,7 +79,8 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         long maxCapacityInRange = daysInRange * maxDeliveryCapacityPerDay;
 
         if (totalJarsFromTodayToCheckDate > maxCapacityInRange) {
-            throw new ProductionException("Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
+            throw new ProductionException(
+                    "Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
         }
     }
 }

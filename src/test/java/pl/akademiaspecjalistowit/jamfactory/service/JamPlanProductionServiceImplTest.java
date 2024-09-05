@@ -1,30 +1,34 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import pl.akademiaspecjalistowit.jamfactory.configuration.EmbeddedPostgresConfiguration;
+import org.springframework.transaction.TransactionSystemException;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
+import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-@DataJpaTest
-@ExtendWith(EmbeddedPostgresConfiguration.EmbeddedPostgresExtension.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {EmbeddedPostgresConfiguration.class})
+@SpringBootTest
+@AutoConfigureEmbeddedDatabase(provider = ZONKY)
 @ActiveProfiles("test")
 class JamPlanProductionServiceImplTest {
 
@@ -39,6 +43,9 @@ class JamPlanProductionServiceImplTest {
     @Autowired
     private JamPlanProductionRepository jamPlanProductionRepository;
 
+    @MockBean
+    private JarService jarService;
+
     @AfterEach
     void tearDown() {
         jamPlanProductionRepository.deleteAll();
@@ -48,11 +55,17 @@ class JamPlanProductionServiceImplTest {
     void should_create_product_plan() {
         //GIVEN
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
-                CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
+            CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
 
-        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
+        JarOrderRequestDto jarOrderRequestDto =
+            new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
+                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
+                jamPlanProductionRequestDto.getLargeJamJars());
+
+        when(jarService.orderJars(jarOrderRequestDto)).thenReturn(UUID.randomUUID());
 
         //WHEN
+        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
         List<JamPlanProductionEntity> all = jamPlanProductionRepository.findAll();
 
         //THEN
@@ -65,10 +78,10 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_throw_exception_when_invalid_capacity() {
+    void should_throw_production_exception_when_invalid_capacity() {
         //GIVEN
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
-                LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS);
+            LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS);
 
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
@@ -78,19 +91,19 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_throw_exception_with_incorrect_capacity() {
+    void should_throw_production_exception_with_incorrect_capacity() {
         //GIVEN
         LocalDate plan_date = LocalDate.now().plusDays(1);
-        Integer jars = 11000;
+        Integer jars = -100;
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
-                jars, jars, jars);
+            jars, jars, jars);
 
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
 
         //THEN
-        assertThrows(ProductionException.class, e);
+        assertThrows(TransactionSystemException.class, e);
     }
 
     @Test
@@ -105,12 +118,12 @@ class JamPlanProductionServiceImplTest {
         Integer jars = 7000;
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
-                jars_s, jars_m, jars);
+            jars_s, jars_m, jars);
 
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto2 = new JamPlanProductionRequestDto(plan_date2,
-                jars_s, jars_m, jars_l);
+            jars_s, jars_m, jars_l);
 
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto2);

@@ -1,9 +1,11 @@
 package pl.akademiaspecjalistowit.jamfactory.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -23,12 +25,15 @@ public class JamPlanProductionEntity {
     @Column(nullable = false)
     private LocalDate planDate;
 
+    @Min(value = 0, message = "Ilość słoików nie może być negatywna")
     @Column(nullable = false)
     private Integer smallJamJars;
 
+    @Min(value = 0, message = "Ilość słoików nie może być negatywna")
     @Column(nullable = false)
     private Integer mediumJamJars;
 
+    @Min(value = 0, message = "Ilość słoików nie może być negatywna")
     @Column(nullable = false)
     private Integer largeJamJars;
 
