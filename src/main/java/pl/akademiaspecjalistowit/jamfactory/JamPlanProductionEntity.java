@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.UUID;
+
 import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
 
 @Getter
@@ -36,22 +37,23 @@ public class JamPlanProductionEntity {
     private Integer productionLimitInKg;
 
     public JamPlanProductionEntity(LocalDate planDate, Integer smallJamJars, Integer mediumJamJars, Integer largeJamJars, Integer productionLimitInKg) {
-        this.smallJamJars = smallJamJars == null ? 0:smallJamJars;
-        this.largeJamJars = largeJamJars == null ? 0:largeJamJars;
-        this.mediumJamJars = mediumJamJars == null ? 0:mediumJamJars;
+        this.smallJamJars = smallJamJars == null ? 0 : smallJamJars;
+        this.largeJamJars = largeJamJars == null ? 0 : largeJamJars;
+        this.mediumJamJars = mediumJamJars == null ? 0 : mediumJamJars;
         this.planId = UUID.randomUUID();
         this.planDate = planDate;
         this.productionLimitInKg = productionLimitInKg;
     }
 
-    public JamPlanProductionEntity(LocalDate planDate, Integer productionLimitInKg){
-        this(planDate,null,null,null, productionLimitInKg);
+    public JamPlanProductionEntity(LocalDate planDate, Integer productionLimitInKg) {
+        this(planDate, null, null, null, productionLimitInKg);
     }
 
 
-    public double getTotalJamWeight(){
+    public double getTotalJamWeight() {
         return (JarSizes.LARGE.value * largeJamJars) + (JarSizes.MEDIUM.value * mediumJamJars) + (JarSizes.SMALL.value * smallJamJars);
     }
+
     public static double getLargeWeight() {
         return JarSizes.LARGE.value;
     }
@@ -85,24 +87,28 @@ public class JamPlanProductionEntity {
     public JamPlanProductionEntity fillProductionPlan(JamJars jars) {
         int i = calculateJamJarsAmountToFit(JarSizes.LARGE);
         Integer actuallyBorrowedLargeAmount = jars.borrowLarge(i);
-        largeJamJars += actuallyBorrowedLargeAmount;
+        largeJamJars += i < actuallyBorrowedLargeAmount ? i : actuallyBorrowedLargeAmount;
 
         int ii = calculateJamJarsAmountToFit(JarSizes.MEDIUM);
         Integer actuallyBorrowedMediumAmount = jars.borrowMedium(ii);
-        mediumJamJars += actuallyBorrowedMediumAmount;
+        mediumJamJars += ii < actuallyBorrowedMediumAmount ? ii : actuallyBorrowedMediumAmount;
 
         int iii = calculateJamJarsAmountToFit(JarSizes.SMALL);
         Integer actuallyBorrowedSmallAmount = jars.borrowSmall(iii);
-        smallJamJars += actuallyBorrowedSmallAmount;
+        smallJamJars += iii < actuallyBorrowedSmallAmount ? iii: actuallyBorrowedSmallAmount;
+
         return this;
     }
 
     private int calculateJamJarsAmountToFit(JarSizes jarSizes) {
-        double kgToFitInProductionPlan = productionLimitInKg - getTotalJamWeight();
-        return (int)(kgToFitInProductionPlan / jarSizes.value);
+        double kgToFitInProductionPlan = 0;
+        if (productionLimitInKg > 0) {
+            kgToFitInProductionPlan = productionLimitInKg - getTotalJamWeight();
+        }
+        return (int) (kgToFitInProductionPlan / jarSizes.value);
     }
 
-    private enum JarSizes{
+    private enum JarSizes {
 
         LARGE(1),
         MEDIUM(0.5),
