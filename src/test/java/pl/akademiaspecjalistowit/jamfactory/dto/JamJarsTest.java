@@ -1,12 +1,8 @@
 package pl.akademiaspecjalistowit.jamfactory.dto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
-import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JamJarsTest {
 

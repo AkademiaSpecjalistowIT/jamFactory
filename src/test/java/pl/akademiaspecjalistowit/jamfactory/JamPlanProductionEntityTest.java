@@ -2,6 +2,7 @@ package pl.akademiaspecjalistowit.jamfactory;
 
 import org.junit.jupiter.api.Test;
 import pl.akademiaspecjalistowit.jamfactory.controller.JamFactoryController;
+import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 
 import java.time.LocalDate;
 

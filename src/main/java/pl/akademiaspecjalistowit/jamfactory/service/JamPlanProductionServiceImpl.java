@@ -1,28 +1,21 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
-import jakarta.transaction.Transactional;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
-import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
+import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
-import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,16 +29,20 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final JarService jarService;
 
     @Override
+    @Transactional
     public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         JamPlanProductionEntity entity =
             jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
+
+        validateProductionPlan(jamPlanProductionRequestDto);
+
         try {
             addNewProductionPlanForGivenDay(entity);
         } catch (ProductionException e) {
             log.info("Procesujemy dodanie planu prodyjnego na więcej niż 1 dzien, ponieważ : " + e.getMessage());
             addProductionPlanBeforeDeadline(entity);
         }
-        //createJarOrder(jamPlanProductionRequestDto);
+        createJarOrder(jamPlanProductionRequestDto);
         return entity.getPlanId();
     }
 
@@ -163,7 +160,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             throw new ProductionException(
                     "Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
         }
-    }
+
 }
 
     private List<LocalDate> createDaySequenceDescending(LocalDate today, LocalDate newProductionPlanDate) {

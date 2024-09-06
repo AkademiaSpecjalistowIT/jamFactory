@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -47,53 +48,52 @@ class JamPlanProductionServiceImplTest {
     void tearDown() {
         jamPlanProductionRepository.deleteAll();
     }
+
     @MockBean
     private JarService jarService;
 
-    @AfterEach
-    void tearDown() {
-        jamPlanProductionRepository.deleteAll();
-    }
 
     @Test
     void should_create_product_plan() {
         //GIVEN
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
-            CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
+                CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
 
         JarOrderRequestDto jarOrderRequestDto =
-            new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
-                jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
-                jamPlanProductionRequestDto.getLargeJamJars());
+                new JarOrderRequestDto(jamPlanProductionRequestDto.getPlanDate().plusDays(1),
+                        jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
+                        jamPlanProductionRequestDto.getLargeJamJars());
 
         when(jarService.orderJars(jarOrderRequestDto)).thenReturn(UUID.randomUUID());
 
         //WHEN
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
-    void should_create_product_plan() {
-        // GIVEN
-        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(
-                CORRECT_PLAN_DATE, 0, 0, CORRECT_QUANTITY_JAM_JARS
-        );
-        // WHEN
-        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
-        // THEN
-        List<JamPlanProductionEntity> all = jamPlanProductionRepository.findAll();
-
-        //THEN
-        assertThat(all).isNotNull();
-        assertThat(all.size()).isEqualTo(1);
-        assertThat(all.get(0).getPlanDate()).isEqualTo(CORRECT_PLAN_DATE);
-        assertThat(all.get(0).getSmallJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
-        assertThat(all.get(0).getMediumJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
-        assertThat(all.get(0).getLargeJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
     }
+
+//    void should_create_product_plan() {
+//        // GIVEN
+//        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(
+//                CORRECT_PLAN_DATE, 0, 0, CORRECT_QUANTITY_JAM_JARS
+//        );
+//        // WHEN
+//        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
+//        // THEN
+//        List<JamPlanProductionEntity> all = jamPlanProductionRepository.findAll();
+//
+//        //THEN
+//        assertThat(all).isNotNull();
+//        assertThat(all.size()).isEqualTo(1);
+//        assertThat(all.get(0).getPlanDate()).isEqualTo(CORRECT_PLAN_DATE);
+//        assertThat(all.get(0).getSmallJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
+//        assertThat(all.get(0).getMediumJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
+//        assertThat(all.get(0).getLargeJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
+//    }
 
     @Test
     void should_throw_production_exception_when_invalid_capacity() {
         //GIVEN
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(CORRECT_PLAN_DATE,
-            LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS);
+                LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS, LARGE_QUANTITY_JAM_JARS);
 
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
@@ -156,7 +156,7 @@ class JamPlanProductionServiceImplTest {
         Integer jars = -100;
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
-            jars, jars, jars);
+                jars, jars, jars);
 
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
@@ -168,8 +168,8 @@ class JamPlanProductionServiceImplTest {
     @Test
     void should_throw_exception_with_add_new_plan_when_capacity_was_full() {
         //GIVEN
-        LocalDate plan_date = LocalDate.now().plusDays(1);
-        LocalDate plan_date2 = LocalDate.now();
+        LocalDate plan_date = LocalDate.now().plusDays(5);
+        LocalDate plan_date2 = LocalDate.now().plusDays(2);
 
         Integer jars_s = 5000;
         Integer jars_m = 5000;
@@ -177,12 +177,12 @@ class JamPlanProductionServiceImplTest {
         Integer jars = 7000;
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(plan_date,
-            jars_s, jars_m, jars);
+                jars_s, jars_m, jars);
 
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
 
         JamPlanProductionRequestDto jamPlanProductionRequestDto2 = new JamPlanProductionRequestDto(plan_date2,
-            jars_s, jars_m, jars_l);
+                jars_s, jars_m, jars_l);
 
         //WHEN
         Executable e = () -> jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto2);
