@@ -11,7 +11,7 @@ import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
 class JamJarsTest {
 
     @Test
-    void should_empty_Large_jamJar() {
+    void should_borrow_all_large_jars_when_requested_amount_equals_current_stock() {
         //given
         JamJars jamJars = new JamJars(0, 0, 1000);
 
@@ -25,7 +25,7 @@ class JamJarsTest {
 
 
     @Test
-    void should_empty_small_jamJar() {
+    void should_borrow_all_small_jars_when_requested_amount_equals_current_stock() {
         //given
         JamJars jamJars = new JamJars(1000, 0, 0);
 
@@ -39,7 +39,7 @@ class JamJarsTest {
 
 
     @Test
-    void should_empty_medium_jamJar() {
+    void should_borrow_all_medium_jars_when_requested_amount_equals_current_stock() {
         //given
         JamJars jamJars = new JamJars(0, 1000, 0);
 
@@ -52,7 +52,7 @@ class JamJarsTest {
     }
 
     @Test
-    void should_empty_medium_jamJar_with_higher_than_initial_value() {
+    void should_borrow_all_medium_jars_with_higher_than_initial_value() {
         //given
         JamJars jamJars = new JamJars(0, 1000, 0);
 
@@ -65,7 +65,7 @@ class JamJarsTest {
     }
 
     @Test
-    void should_empty_medium_jamJar2() {
+    void should_borrow_medium_jars_equals_requested_quantity_when_request_less_than_initial_value() {
         //given
         JamJars jamJars = new JamJars(0, 1000, 0);
 
