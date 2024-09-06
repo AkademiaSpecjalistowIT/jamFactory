@@ -11,4 +11,5 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApiProperties {
     private Integer maxDeliveryCapacity;
+    private Integer maxProductionLimit;
 }

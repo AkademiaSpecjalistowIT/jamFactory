@@ -6,10 +6,11 @@ import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 
 @Component
 public class JamsMapper {
-    public JamPlanProductionEntity toEntity(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+    public JamPlanProductionEntity toEntity(JamPlanProductionRequestDto jamPlanProductionRequestDto, Integer limit) {
         return new JamPlanProductionEntity(jamPlanProductionRequestDto.getPlanDate(),
-                jamPlanProductionRequestDto.getSmallJamJars(),
-                jamPlanProductionRequestDto.getMediumJamJars(),
-                jamPlanProductionRequestDto.getLargeJamJars());
+            jamPlanProductionRequestDto.getSmallJamJars(),
+            jamPlanProductionRequestDto.getMediumJamJars(),
+            jamPlanProductionRequestDto.getLargeJamJars(),
+            limit);
     }
 }

@@ -19,7 +19,7 @@ public class JamFactoryController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/product-plan")
-    public UUID addProductionPlan(@RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+    public UUID addProductionPlan( @RequestBody JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         return jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
     }
 

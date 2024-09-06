@@ -16,6 +16,7 @@ spring:
 
 limits:
   maxDeliveryCapacity: 15000
+  maxProductionLimit: 2000
 
 jar-factory:
   paths:
