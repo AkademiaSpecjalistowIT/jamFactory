@@ -2,6 +2,7 @@ package pl.akademiaspecjalistowit.jamfactory.service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -104,8 +105,14 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     }
 
     private List<LocalDate> createDaySequenceDescending(LocalDate today, LocalDate newProductionPlanDate) {
-        //TODO
-        return List.of();
+        List<LocalDate> dates = new ArrayList<>();
+
+        while (!today.isAfter(newProductionPlanDate)) {
+            dates.add(today);
+            today = today.plusDays(1);
+        }
+
+        return dates;
     }
 
     private void validateCapabilityForNewProductionPlan(JamPlanProductionEntity newProductionPlan, LocalDate today,

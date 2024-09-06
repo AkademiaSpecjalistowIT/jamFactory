@@ -37,9 +37,6 @@ class JamPlanProductionServiceImplTest {
     @Autowired
     private JamPlanProductionRepository jamPlanProductionRepository;
 
-    //@Autowired
-    //private JamsMapper jamsMapper;
-
     @AfterEach
     void tearDown() {
         jamPlanProductionRepository.deleteAll();

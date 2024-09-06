@@ -87,22 +87,19 @@ public class JamPlanProductionEntity {
     public JamPlanProductionEntity fillProductionPlan(JamJars jars) {
         int i = calculateJamJarsAmountToFit(JarSizes.LARGE);
         Integer possibleBorrowedLargeAmount = jars.borrowLarge(i);
-        //largeJamJars += actuallyBorrowedLargeAmount;
-        int actuallyBorrowedLargeAmount = i < possibleBorrowedLargeAmount ? i : possibleBorrowedLargeAmount;
+        int actuallyBorrowedLargeAmount = possibleBorrowedLargeAmount;
         jars.updateLarge(actuallyBorrowedLargeAmount);
         largeJamJars += actuallyBorrowedLargeAmount;
 
         int ii = calculateJamJarsAmountToFit(JarSizes.MEDIUM);
         Integer possibleBorrowedMediumAmount = jars.borrowMedium(ii);
-        //mediumJamJars += actuallyBorrowedMediumAmount;
-        int actuallyBorrowedMediumAmount = ii < possibleBorrowedMediumAmount ? ii : possibleBorrowedMediumAmount;
+        int actuallyBorrowedMediumAmount = possibleBorrowedMediumAmount;
         jars.updateMedium(actuallyBorrowedMediumAmount);
         mediumJamJars += actuallyBorrowedMediumAmount;
 
         int iii = calculateJamJarsAmountToFit(JarSizes.SMALL);
         Integer possibleBorrowedSmallAmount = jars.borrowSmall(iii);
-        //smallJamJars += actuallyBorrowedSmallAmount;
-        int actuallyBorrowedSmallAmount = iii < possibleBorrowedSmallAmount ? iii : possibleBorrowedSmallAmount;
+        int actuallyBorrowedSmallAmount = possibleBorrowedSmallAmount;
         jars.updateSmall(actuallyBorrowedSmallAmount);
         smallJamJars += actuallyBorrowedSmallAmount;
 
@@ -117,7 +114,7 @@ public class JamPlanProductionEntity {
 //        return (int) (kgToFitInProductionPlan / jarSizes.value);
 
         double kgToFitInProductionPlan = productionLimitInKg - getTotalJamWeight();
-        return (int)(kgToFitInProductionPlan / jarSizes.value);
+        return (int) (kgToFitInProductionPlan / jarSizes.value);
     }
 
     private enum JarSizes {

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 import pl.akademiaspecjalistowit.jamfactory.JamPlanProductionEntity;
 
@@ -72,7 +73,6 @@ class JamJarsTest {
         Integer borrowedMedium = jamJars.borrowMedium(500);
 
         //then
-        //assertThat(jamJars.isEmpty()).isTrue();
         assertThat(borrowedMedium).isEqualTo(500);
     }
 

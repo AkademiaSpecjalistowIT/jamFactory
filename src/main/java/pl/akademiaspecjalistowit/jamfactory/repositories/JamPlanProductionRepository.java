@@ -20,38 +20,5 @@ public interface JamPlanProductionRepository extends JpaRepository<JamPlanProduc
 
     List<JamPlanProductionEntity> findAllByPlanDateBetween(LocalDate from, LocalDate to);
 
-
-//    @Query("SELECT j.planDate, SUM(CAST(j.smallJamJars AS double) * :smallWeight), SUM(CAST(j.mediumJamJars AS double) * :mediumWeight), SUM(CAST(j.largeJamJars AS double) * :largeWeight) " +
-//            "FROM JamPlanProductionEntity j " +
-//            "WHERE j.planDate BETWEEN :dateFrom AND :dateTo " +
-//            "GROUP BY j.planDate " +
-//            "ORDER BY j.planDate DESC")
-//    List<Object[]> findAvailableProductionCapacityForSpecifiedPeriod(
-//            @Param("dateFrom") LocalDate dateFrom,
-//            @Param("dateTo") LocalDate dateTo,
-//            @Param("smallWeight") double smallWeight,
-//            @Param("mediumWeight") double mediumWeight,
-//            @Param("largeWeight") double largeWeight);
-//
-//    default Map<LocalDate, List<Double>> findAvailableProductionCapacityForSpecifiedPeriodWithEnum(LocalDate dateFrom, LocalDate dateTo) {
-//        List<Object[]> rawResults = findAvailableProductionCapacityForSpecifiedPeriod(
-//                dateFrom, dateTo, JamPlanProductionEntity.getSmallWeight(), JamPlanProductionEntity.getMediumWeight(), JamPlanProductionEntity.getLargeWeight()
-//
-//        );
-//
-//        Map<LocalDate, List<Double>> resultMap = new HashMap<>();
-//
-//        for (Object[] row : rawResults) {
-//            LocalDate date = (LocalDate) row[0];
-//            Double smallSum = (Double) row[1];
-//            Double mediumSum = (Double) row[2];
-//            Double largeSum = (Double) row[3];
-//
-//            resultMap.put(date, Arrays.asList(smallSum, mediumSum, largeSum));
-//        }
-//
-//        return resultMap;
-//    }
-
     Optional<JamPlanProductionEntity> findByPlanDate(LocalDate planDate);
 }
