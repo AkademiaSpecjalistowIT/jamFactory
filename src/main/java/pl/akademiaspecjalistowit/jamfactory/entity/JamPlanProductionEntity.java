@@ -5,12 +5,10 @@ import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
 
 import java.time.LocalDate;
 import java.util.UUID;
-
-import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
