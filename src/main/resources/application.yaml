@@ -1,8 +1,7 @@
-server:
-  port: 8101
 spring:
   application:
     name: jamFactory
+
   datasource:
     url: jdbc:postgresql://localhost:5440/jam_factory
     username: postgres
@@ -14,5 +13,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
 limits:
+  maxDeliveryCapacity: 15000
   maxProductionLimit: 2000
+
+jar-factory:
+  paths:
+    orders: http://localhost:8081/api/v1/jars/order

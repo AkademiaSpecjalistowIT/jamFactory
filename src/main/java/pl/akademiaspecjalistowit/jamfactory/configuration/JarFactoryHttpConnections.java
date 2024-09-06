@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "limits")
+@ConfigurationProperties(prefix = "jar-factory.paths")
 @Component
-public class ApiProperties {
-    private Integer maxDeliveryCapacity;
-    private Integer maxProductionLimit;
+public class JarFactoryHttpConnections {
+    private String orders;
 }
