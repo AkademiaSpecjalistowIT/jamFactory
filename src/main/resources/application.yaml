@@ -13,3 +13,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+limits:
+  maxDeliveryCapacity: 15000
+  maxProductionLimit: 2000
+
+jar-factory:
+  paths:
+    orders: http://localhost:8081/api/v1/jars/order
