@@ -57,24 +57,49 @@ class JamPlanProductionServiceImplTest {
     }
 
     @Test
-    void should_throw_exception_when_limit_exceeded() {
+    void should_distribute_excess_when_limit_exceeded() {
         // GIVEN
         JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
-                CORRECT_PLAN_DATE, 0, 0, 1500
+                LocalDate.of(2024, 9, 7), 0, 0, 1500
         );
         jamPlanProductionService.addProductionPlan(requestDto1);
 
         JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
-                CORRECT_PLAN_DATE, 0, 0, 600
+                LocalDate.of(2024, 9, 9), 0, 0, 600
+        );
+        LocalDate today = LocalDate.now();
+
+        jamPlanProductionService.addProductionPlan(requestDto2);
+        //then
+        List<JamPlanProductionEntity> allByPlanDateBetween =
+                jamPlanProductionRepository.findAllByPlanDateBetween(today, requestDto2.getPlanDate());
+        double plannedFactoryProductionInKg = allByPlanDateBetween.stream()
+                .mapToDouble(JamPlanProductionEntity::getTotalJamWeight)
+                .sum();
+        assertThat(plannedFactoryProductionInKg).isEqualTo(2100);
+    }
+
+    @Test
+    void should_throw_exception_when_limit_exceeded_and_not_exist_possibility_distribute_because_exceeds_more_then_maxCapacity() {
+        // GIVEN
+        JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
+                LocalDate.of(2024, 9, 7), 0, 0, 1500
         );
 
-        // WHEN & THEN
+        jamPlanProductionService.addProductionPlan(requestDto1);
+
+        JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
+                LocalDate.of(2024, 9, 7), 0, 0, 2600
+        );
+        LocalDate today = LocalDate.now();
+
+        //when&then
         ProductionException thrownException = assertThrows(
                 ProductionException.class,
-                () -> jamPlanProductionService.addProductionPlan(requestDto2),
-                "Expected addProductionPlan() to throw, but it didn't"
-        );
+                () -> jamPlanProductionService.addProductionPlan(requestDto2));
+
 
         assertThat(thrownException.getMessage()).contains("Przekroczono limit produkcyjny");
+
     }
 }
