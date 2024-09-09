@@ -7,12 +7,16 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamListPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionResponseDto;
 import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -32,7 +36,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     @Transactional
     public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         JamPlanProductionEntity entity =
-            jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
+                jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
 
         validateProductionPlan(jamPlanProductionRequestDto);
 
@@ -46,6 +50,34 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         return entity.getPlanId();
     }
 
+    @Override
+    public JamListPlanProductionResponseDto getPlanProduction() {
+        LocalDate today = LocalDate.now();
+        LocalDate todayPlusSevenDays = LocalDate.now().plusDays(7);
+
+        List<JamPlanProductionResponseDto> list = jamPlanProductionRepository.findAll().stream()
+                .filter(plan -> !plan.getPlanDate().isBefore(today) && !plan.getPlanDate().isAfter(todayPlusSevenDays))
+                .map(entity -> jamsMapper.toResponse(entity))
+                .toList();
+
+        int sumSmallJamJars = jamPlanProductionRepository.findAll().stream()
+                .filter(plan -> !plan.getPlanDate().isBefore(today) && !plan.getPlanDate().isAfter(todayPlusSevenDays))
+                .mapToInt(plan -> plan.getSmallJamJars())
+                .sum();
+
+        int sumMediumJamJars = jamPlanProductionRepository.findAll().stream()
+                .filter(plan -> !plan.getPlanDate().isBefore(today) && !plan.getPlanDate().isAfter(todayPlusSevenDays))
+                .mapToInt(plan -> plan.getMediumJamJars())
+                .sum();
+
+        int sumLargeJamJars = jamPlanProductionRepository.findAll().stream()
+                .filter(plan -> !plan.getPlanDate().isBefore(today) && !plan.getPlanDate().isAfter(todayPlusSevenDays))
+                .mapToInt(plan -> plan.getLargeJamJars())
+                .sum();
+
+        return new JamListPlanProductionResponseDto(list, sumSmallJamJars, sumMediumJamJars, sumLargeJamJars);
+    }
+
     private void addNewProductionPlanForGivenDay(JamPlanProductionEntity newProductionPlan) {
         double maxProductionLimit = apiProperties.getMaxProductionLimit();
         double totalJamWeight = newProductionPlan.getTotalJamWeight();
@@ -54,8 +86,8 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
         LocalDate newPlanDate = newProductionPlan.getPlanDate();
         JamPlanProductionEntity jamPlanProductionEntity = jamPlanProductionRepository.findByPlanDate(newPlanDate)
-            .map(e -> updateExistingPlan(newProductionPlan, maxProductionLimit, totalJamWeight, e))
-            .orElse(newProductionPlan);
+                .map(e -> updateExistingPlan(newProductionPlan, maxProductionLimit, totalJamWeight, e))
+                .orElse(newProductionPlan);
         jamPlanProductionRepository.save(jamPlanProductionEntity);
     }
 
@@ -66,7 +98,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         if (newTotal > maxProductionLimit) {
             double exceededLimit = totalJamWeight - maxProductionLimit;
             throw new ProductionException(
-                "Przekroczono limit produkcyjny na wskazany dzien o " + exceededLimit + " Kg");
+                    "Przekroczono limit produkcyjny na wskazany dzien o " + exceededLimit + " Kg");
         }
         e.updatePlan(newProductionPlan);
         return e;
@@ -76,7 +108,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         if (totalJamWeight > maxProductionLimit) {
             double exceededLimit = totalJamWeight - maxProductionLimit;
             throw new ProductionException(
-                "Przekroczono limit produkcyjny na wskazany dzien o " + exceededLimit + " Kg");
+                    "Przekroczono limit produkcyjny na wskazany dzien o " + exceededLimit + " Kg");
         }
     }
 
@@ -85,26 +117,26 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         LocalDate today = LocalDate.now();
 
         List<JamPlanProductionEntity> allByPlanDateBetween =
-            jamPlanProductionRepository.findAllByPlanDateBetween(today, newProductionPlan.getPlanDate());
+                jamPlanProductionRepository.findAllByPlanDateBetween(today, newProductionPlan.getPlanDate());
 
         validateCapabilityForNewProductionPlan(newProductionPlan, today, allByPlanDateBetween);
 
         List<LocalDate> daySequenceDescending = createDaySequenceDescending(today, newProductionPlan.getPlanDate());
 
         JamJars jars = new JamJars(newProductionPlan.getSmallJamJars(), newProductionPlan.getMediumJamJars(),
-            newProductionPlan.getLargeJamJars());
+                newProductionPlan.getLargeJamJars());
 
         for (LocalDate day : daySequenceDescending) {
             JamPlanProductionEntity jamPlanProductionEntity = allByPlanDateBetween.stream()
-                .filter(e -> e.getPlanDate().equals(day))
-                .findFirst()
-                .map(e -> e.fillProductionPlan(jars))
-                .orElseGet(() -> {
-                    JamPlanProductionEntity jppe =
-                        new JamPlanProductionEntity(day, apiProperties.getMaxProductionLimit());
-                    jppe.fillProductionPlan(jars);
-                    return jppe;
-                });
+                    .filter(e -> e.getPlanDate().equals(day))
+                    .findFirst()
+                    .map(e -> e.fillProductionPlan(jars))
+                    .orElseGet(() -> {
+                        JamPlanProductionEntity jppe =
+                                new JamPlanProductionEntity(day, apiProperties.getMaxProductionLimit());
+                        jppe.fillProductionPlan(jars);
+                        return jppe;
+                    });
             jamPlanProductionRepository.save(jamPlanProductionEntity);
 
             if (jars.isEmpty()) {
@@ -161,7 +193,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
                     "Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
         }
 
-}
+    }
 
     private List<LocalDate> createDaySequenceDescending(LocalDate today, LocalDate newProductionPlanDate) {
         List<LocalDate> dates = new ArrayList<>();
@@ -182,8 +214,8 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         double maxFactoryProductionInKg = factoryWorkingDaysUntilDeadline * maxProductionLimit;
 
         double plannedFactoryProductionInKg = allByPlanDateBetween.stream()
-            .mapToDouble(JamPlanProductionEntity::getTotalJamWeight)
-            .sum();
+                .mapToDouble(JamPlanProductionEntity::getTotalJamWeight)
+                .sum();
 
         if (plannedFactoryProductionInKg + newProductionPlan.getTotalJamWeight() > maxFactoryProductionInKg) {
             throw new ProductionException("Przekroczono limit produkcyjny fabryki do tego dnia");
@@ -192,7 +224,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
     private long getFactoryWorkingDaysUntilDeadline(JamPlanProductionEntity entity, LocalDate today) {
         return Duration.between(today.atStartOfDay(),
-            entity.getPlanDate().atStartOfDay()).toDays() + 1;
+                entity.getPlanDate().atStartOfDay()).toDays() + 1;
     }
 
 }

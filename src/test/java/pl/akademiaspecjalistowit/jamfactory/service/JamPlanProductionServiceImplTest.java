@@ -1,18 +1,6 @@
 package pl.akademiaspecjalistowit.jamfactory.service;
 
-import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -21,12 +9,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.TransactionSystemException;
+import pl.akademiaspecjalistowit.jamfactory.dto.JamListPlanProductionResponseDto;
 import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
-import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
@@ -70,24 +67,6 @@ class JamPlanProductionServiceImplTest {
         jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
     }
 
-//    void should_create_product_plan() {
-//        // GIVEN
-//        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(
-//                CORRECT_PLAN_DATE, 0, 0, CORRECT_QUANTITY_JAM_JARS
-//        );
-//        // WHEN
-//        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
-//        // THEN
-//        List<JamPlanProductionEntity> all = jamPlanProductionRepository.findAll();
-//
-//        //THEN
-//        assertThat(all).isNotNull();
-//        assertThat(all.size()).isEqualTo(1);
-//        assertThat(all.get(0).getPlanDate()).isEqualTo(CORRECT_PLAN_DATE);
-//        assertThat(all.get(0).getSmallJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
-//        assertThat(all.get(0).getMediumJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
-//        assertThat(all.get(0).getLargeJamJars()).isEqualTo(CORRECT_QUANTITY_JAM_JARS);
-//    }
 
     @Test
     void should_throw_production_exception_when_invalid_capacity() {
@@ -106,12 +85,12 @@ class JamPlanProductionServiceImplTest {
     void should_distribute_excess_when_limit_exceeded() {
         // GIVEN
         JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 7), 0, 0, 1500
+                LocalDate.now(), 0, 0, 1500
         );
         jamPlanProductionService.addProductionPlan(requestDto1);
 
         JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 9), 0, 0, 600
+                LocalDate.now().plusDays(2), 0, 0, 600
         );
         LocalDate today = LocalDate.now();
 
@@ -129,13 +108,13 @@ class JamPlanProductionServiceImplTest {
     void should_throw_exception_when_limit_exceeded_and_not_exist_possibility_distribute_because_exceeds_more_then_maxCapacity() {
         // GIVEN
         JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 7), 0, 0, 1500
+                LocalDate.now(), 0, 0, 1500
         );
 
         jamPlanProductionService.addProductionPlan(requestDto1);
 
         JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 7), 0, 0, 2600
+                LocalDate.now(), 0, 0, 2600
         );
         LocalDate today = LocalDate.now();
 
@@ -189,5 +168,32 @@ class JamPlanProductionServiceImplTest {
 
         //THEN
         assertThrows(ProductionException.class, e);
+    }
+    @Test
+    void should_find_product_plan() {
+        //GIVEN
+        LocalDate today = LocalDate.now();//of(2024,9,5);
+        LocalDate todayPlusSevenDays = LocalDate.now().plusDays(7);//of(2024,9,11);
+
+        JamPlanProductionRequestDto jamPlanProductionRequestDto = new JamPlanProductionRequestDto(today,
+                CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
+
+        JamPlanProductionRequestDto jamPlanProductionRequestDtoAfterSevenDays = new JamPlanProductionRequestDto(todayPlusSevenDays,
+                CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS, CORRECT_QUANTITY_JAM_JARS);
+
+        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDto);
+        jamPlanProductionService.addProductionPlan(jamPlanProductionRequestDtoAfterSevenDays);
+
+        //WHEN
+        JamListPlanProductionResponseDto listPlanProduction = jamPlanProductionService.getPlanProduction();
+
+        //THEN
+        assertThat(listPlanProduction).isNotNull();
+        assertThat(listPlanProduction.getListPlans().size()).isEqualTo(2);
+        assertThat(listPlanProduction.getSumSmallJamJars()).isEqualTo(200);
+        assertThat(listPlanProduction.getSumMediumJamJars()).isEqualTo(200);
+        assertThat(listPlanProduction.getSumLargeJamJars()).isEqualTo(200);
+        assertThat(listPlanProduction.getListPlans().getFirst().getPlanDate()).isEqualTo(today);
+        assertThat(listPlanProduction.getListPlans().get(1).getPlanDate()).isEqualTo(todayPlusSevenDays);
     }
 }
