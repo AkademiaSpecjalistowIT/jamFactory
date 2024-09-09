@@ -78,8 +78,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         return new JamListPlanProductionResponseDto(list, sumSmallJamJars, sumMediumJamJars, sumLargeJamJars);
     }
 
-
-
     private void addNewProductionPlanForGivenDay(JamPlanProductionEntity newProductionPlan) {
         double maxProductionLimit = apiProperties.getMaxProductionLimit();
         double totalJamWeight = newProductionPlan.getTotalJamWeight();

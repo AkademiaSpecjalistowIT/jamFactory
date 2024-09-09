@@ -85,12 +85,12 @@ class JamPlanProductionServiceImplTest {
     void should_distribute_excess_when_limit_exceeded() {
         // GIVEN
         JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 7), 0, 0, 1500
+                LocalDate.now(), 0, 0, 1500
         );
         jamPlanProductionService.addProductionPlan(requestDto1);
 
         JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 9), 0, 0, 600
+                LocalDate.now().plusDays(2), 0, 0, 600
         );
         LocalDate today = LocalDate.now();
 
@@ -108,13 +108,13 @@ class JamPlanProductionServiceImplTest {
     void should_throw_exception_when_limit_exceeded_and_not_exist_possibility_distribute_because_exceeds_more_then_maxCapacity() {
         // GIVEN
         JamPlanProductionRequestDto requestDto1 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 7), 0, 0, 1500
+                LocalDate.now(), 0, 0, 1500
         );
 
         jamPlanProductionService.addProductionPlan(requestDto1);
 
         JamPlanProductionRequestDto requestDto2 = new JamPlanProductionRequestDto(
-                LocalDate.of(2024, 9, 7), 0, 0, 2600
+                LocalDate.now(), 0, 0, 2600
         );
         LocalDate today = LocalDate.now();
 
