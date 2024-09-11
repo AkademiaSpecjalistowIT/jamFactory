@@ -7,7 +7,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.akademiaspecjalistowit.jamfactory.configuration.JarFactoryHttpConnections;
-import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 
 @Component

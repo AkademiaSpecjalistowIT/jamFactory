@@ -81,16 +81,14 @@
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
-            <artifactId>openapi-generator-maven-plugin</artifactId>
-            <version>7.8.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
             <version>0.2.6</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.22</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -124,14 +122,14 @@
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                             <configOptions>
                                 <additionalModelTypeAnnotations>
-<!--                                    @lombok.Builder-->
-<!--                                    @lombok.AllArgsConstructor-->
-<!--                                    @lombok.NoArgsConstructor-->
+                                    <!--                                    @lombok.Builder-->
+                                    <!--                                    @lombok.AllArgsConstructor-->
+                                    <!--                                    @lombok.NoArgsConstructor-->
                                     @lombok.Getter
                                 </additionalModelTypeAnnotations>
                                 <useJakartaEe>true</useJakartaEe>
                                 <interfaceOnly>true</interfaceOnly>
-                                <delegatePattern>true</delegatePattern>
+                                <delegatePattern>false</delegatePattern>
                             </configOptions>
                         </configuration>
                     </execution>

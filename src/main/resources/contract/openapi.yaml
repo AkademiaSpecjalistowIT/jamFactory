@@ -11,6 +11,8 @@ servers:
 tags:
   - name: ProductionPlans
     description: Endpoints related to creating jam production plans.
+  - name: JarOrders
+    description: Endpoints related to jar orders.
 
 paths:
   /jams/product-plan:
@@ -25,26 +27,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JamProductionPlanRequest'
+              $ref: '#/components/schemas/JamPlanProductionRequestDto'
       responses:
-        '201':
-          description: Production plan created successfully
+        '204':
+          description: Production plan created successfully with no content
+        '400':
+          description: Production error or insufficient jars
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductionPlanResponse'
+                $ref: '#/components/schemas/RejectResponse'
         '422':
           description: Business logic error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BusinessErrorResponse'
-        '501':
-          description: Not Implemented
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotImplementedError'
+                $ref: '#/components/schemas/RejectResponse'
 
     get:
       tags:
@@ -57,99 +55,146 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductionPlanOverviewResponse'
+                $ref: '#/components/schemas/JamListPlanProductionResponseDto'
         '400':
           description: Error retrieving the production plan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductionPlanErrorResponse'
+                $ref: '#/components/schemas/RejectResponse'
 
 components:
   schemas:
-    JamProductionPlanRequest:
+    JarOrderRequestDto:
       type: object
+      required:
+        - deliveryDate
+        - smallJars
+        - mediumJars
+        - largeJars
       properties:
-        planDate:
+        deliveryDate:
           type: string
           format: date
-          example: "2024-09-01"
-        smallJamJars:
+          example: "2024-10-15"
+          description: "Date when the jars should be delivered."
+        smallJars:
           type: integer
-          example: 100
-        mediumJamJars:
+          example: 500
+          description: "Number of small jars to be ordered."
+        mediumJars:
           type: integer
-          example: 50
-        largeJamJars:
+          example: 300
+          description: "Number of medium jars to be ordered."
+        largeJars:
           type: integer
-          example: 20
+          example: 200
+          description: "Number of large jars to be ordered."
+
+    JarOrderResponseDto:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        deliveryDate:
+          type: string
+          format: date
+          example: "2024-10-15"
+        smallJars:
+          type: integer
+          example: 500
+        mediumJars:
+          type: integer
+          example: 300
+        largeJars:
+          type: integer
+          example: 200
+
+    JamPlanProductionRequestDto:
+      type: object
       required:
         - planDate
         - smallJamJars
         - mediumJamJars
         - largeJamJars
-
-    ProductionPlanResponse:
-      type: object
       properties:
-        planId:
+        planDate:
           type: string
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          format: date
+          example: "2024-09-01"
+          description: "Date of the production plan (cannot be null)"
+        smallJamJars:
+          type: integer
+          minimum: 0
+          example: 100
+          description: "Number of small jam jars (cannot be null or negative)"
+        mediumJamJars:
+          type: integer
+          minimum: 0
+          example: 50
+          description: "Number of medium jam jars (cannot be null or negative)"
+        largeJamJars:
+          type: integer
+          minimum: 0
+          example: 20
+          description: "Number of large jam jars (cannot be null or negative)"
 
-    BusinessErrorResponse:
+    JamPlanProductionResponseDto:
+      type: object
+      required:
+        - planDate
+        - smallJamJars
+        - mediumJamJars
+        - largeJamJars
+      properties:
+        planDate:
+          type: string
+          format: date
+          example: "2024-09-01"
+          description: "The date of the jam production plan"
+        smallJamJars:
+          type: integer
+          example: 100
+          description: "Number of small jam jars produced"
+        mediumJamJars:
+          type: integer
+          example: 50
+          description: "Number of medium jam jars produced"
+        largeJamJars:
+          type: integer
+          example: 20
+          description: "Number of large jam jars produced"
+
+    JamListPlanProductionResponseDto:
+      type: object
+      required:
+        - listPlans
+        - sumSmallJamJars
+        - sumMediumJamJars
+        - sumLargeJamJars
+      properties:
+        listPlans:
+          type: array
+          items:
+            $ref: '#/components/schemas/JamPlanProductionResponseDto'
+        sumSmallJamJars:
+          type: integer
+          example: 600
+        sumMediumJamJars:
+          type: integer
+          example: 900
+        sumLargeJamJars:
+          type: integer
+          example: 1100
+
+    RejectResponse:
       type: object
       properties:
         rejectReason:
           type: string
-          example: "przekraczająca zdolność produkcyjna"
-
-    ProductionPlanErrorResponse:
-      type: object
-      properties:
-        reason:
-          type: string
-          example: "Błąd dodania planu produkcyjnego - przekroczono XXXXXX"
+          example: "Exceeded production capacity"
         code:
           type: string
-          example: "JAM_DAILY_PRODUCTION_LIMIT_EXCEDED"
-
-    NotImplementedError:
-      type: object
-      properties:
-        error:
-          type: string
-          example: "Not Implemented"
-
-    ProductionPlanOverviewResponse:
-      type: object
-      properties:
-        perDay:
-          type: array
-          items:
-            type: object
-            properties:
-              date:
-                type: string
-                format: date
-                example: "2024-08-12"
-              M:
-                type: integer
-                example: 500
-              L:
-                type: integer
-                example: 300
-              S:
-                type: integer
-                example: 200
-        sum:
-          type: object
-          properties:
-            M:
-              type: integer
-              example: 1100
-            L:
-              type: integer
-              example: 900
-            S:
-              type: integer
-              example: 600
+          example: "BUSINESS_ERROR"

@@ -5,18 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamListPlanProductionResponseDto;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionResponseDto;
-import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
+import pl.akademiaspecjalistowit.jamfactory.model.*;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,7 +28,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
 
     @Override
     @Transactional
-    public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+    public void addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         JamPlanProductionEntity entity =
                 jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
 
@@ -47,7 +41,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             addProductionPlanBeforeDeadline(entity);
         }
         createJarOrder(jamPlanProductionRequestDto);
-        return entity.getPlanId();
     }
 
     @Override
