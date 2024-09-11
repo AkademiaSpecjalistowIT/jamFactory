@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
+import pl.akademiaspecjalistowit.jamfactory.model.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
-import pl.akademiaspecjalistowit.jamfactory.model.*;
+import pl.akademiaspecjalistowit.jamfactory.model.JamListPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
 import java.time.Duration;
@@ -25,6 +29,24 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final JamsMapper jamsMapper;
     private final ApiProperties apiProperties;
     private final JarService jarService;
+
+//    @Override
+//    @Transactional
+//    public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+//        JamPlanProductionEntity entity =
+//                jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
+//
+//        validateProductionPlan(jamPlanProductionRequestDto);
+//
+//        try {
+//            addNewProductionPlanForGivenDay(entity);
+//        } catch (ProductionException e) {
+//            log.info("Procesujemy dodanie planu prodyjnego na więcej niż 1 dzien, ponieważ : " + e.getMessage());
+//            addProductionPlanBeforeDeadline(entity);
+//        }
+//        createJarOrder(jamPlanProductionRequestDto);
+//        return entity.getPlanId();
+//    }
 
     @Override
     @Transactional
