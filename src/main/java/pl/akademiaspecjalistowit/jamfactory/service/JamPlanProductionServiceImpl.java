@@ -33,7 +33,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final JarService jarService;
 
     @Override
-    @Transactional
     public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         JamPlanProductionEntity entity =
                 jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
