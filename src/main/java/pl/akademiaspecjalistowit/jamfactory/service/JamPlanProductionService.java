@@ -7,8 +7,8 @@ import java.util.UUID;
 
 public interface JamPlanProductionService {
 
-//    UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto);
-    void addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto);
+    UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto);
+//    void addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto);
 
     JamListPlanProductionResponseDto getPlanProduction();
 }

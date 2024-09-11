@@ -29,8 +29,16 @@ paths:
             schema:
               $ref: '#/components/schemas/JamPlanProductionRequestDto'
       responses:
-        '204':
-          description: Production plan created successfully with no content
+#        '204':
+#          description: Production plan created successfully with no content
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              example:
+                orderId: "123e4567-e89b-12d3-a456-426614174000"
         '400':
           description: Production error or insufficient jars
           content:
@@ -91,26 +99,26 @@ components:
           example: 200
           description: "Number of large jars to be ordered."
 
-    JarOrderResponseDto:
-      type: object
-      properties:
-        orderId:
-          type: string
-          format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        deliveryDate:
-          type: string
-          format: date
-          example: "2024-10-15"
-        smallJars:
-          type: integer
-          example: 500
-        mediumJars:
-          type: integer
-          example: 300
-        largeJars:
-          type: integer
-          example: 200
+#    JarOrderResponseDto:
+#      type: object
+#      properties:
+#        orderId:
+#          type: string
+#          format: uuid
+#          example: "123e4567-e89b-12d3-a456-426614174000"
+#        deliveryDate:
+#          type: string
+#          format: date
+#          example: "2024-10-15"
+#        smallJars:
+#          type: integer
+#          example: 500
+#        mediumJars:
+#          type: integer
+#          example: 300
+#        largeJars:
+#          type: integer
+#          example: 200
 
     JamPlanProductionRequestDto:
       type: object
@@ -188,6 +196,16 @@ components:
         sumLargeJamJars:
           type: integer
           example: 1100
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: "Unique order identifier"
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      required:
+        - orderId
 
     RejectResponse:
       type: object
