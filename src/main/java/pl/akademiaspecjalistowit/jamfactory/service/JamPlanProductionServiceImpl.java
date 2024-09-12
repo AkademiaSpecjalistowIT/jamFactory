@@ -30,9 +30,11 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final ApiProperties apiProperties;
     private final JarService jarService;
 
+
+
     @Override
     @Transactional
-    public UUID addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+    public void addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
         JamPlanProductionEntity entity =
                 jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
 
@@ -45,25 +47,7 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             addProductionPlanBeforeDeadline(entity);
         }
         createJarOrder(jamPlanProductionRequestDto);
-        return entity.getPlanId();
     }
-
-//    @Override
-//    @Transactional
-//    public void addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
-//        JamPlanProductionEntity entity =
-//                jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
-//
-//        validateProductionPlan(jamPlanProductionRequestDto);
-//
-//        try {
-//            addNewProductionPlanForGivenDay(entity);
-//        } catch (ProductionException e) {
-//            log.info("Procesujemy dodanie planu prodyjnego na więcej niż 1 dzien, ponieważ : " + e.getMessage());
-//            addProductionPlanBeforeDeadline(entity);
-//        }
-//        createJarOrder(jamPlanProductionRequestDto);
-//    }
 
     @Override
     public JamListPlanProductionResponseDto getPlanProduction() {
