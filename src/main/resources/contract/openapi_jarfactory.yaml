@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: JarFactory API
+  version: 1.0.0
+  description: API for ordering jars from the JarFactory
+
+servers:
+  - url: http://localhost:8081
+    description: Jar server
+
+tags:
+  - name: Orders
+    description: Endpoints related to ordering jars.
+
+paths:
+  /api/v1/jars/order:
+    post:
+      tags:
+        - Orders
+      summary: Create a new jar order
+      operationId: createJarOrder
+      requestBody:
+        description: Order details for jars
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JarOrderRequestDto'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              example:
+                orderId: "123e4567-e89b-12d3-a456-426614174000"
+        '422':
+          description: Business logic error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessErrorResponse'
+
+  /api/v1/jars/order/{id}:
+    patch:
+      tags:
+        - Orders
+      summary: Update jar order with JSON Patch
+      operationId: patchJarOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique technical ID of the order to be patched
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: JSON Patch document
+        required: true
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/patchRequest'
+      responses:
+        '204':
+          description: Order updated successfully, no content returned
+        '422':
+          description: Validation error or business logic error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessErrorResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+components:
+  schemas:
+    JarOrderRequestDto:
+      type: object
+      properties:
+        deliveryDate:
+          type: string
+          format: date
+          example: "2024-10-21"
+          description: "Delivery date for the jars"
+        smallJars:
+          type: integer
+          minimum: 0
+          example: 10
+          description: "Number of small jars (must be zero or a positive integer)"
+        mediumJars:
+          type: integer
+          minimum: 0
+          example: 5
+          description: "Number of medium jars (must be zero or a positive integer)"
+        largeJars:
+          type: integer
+          minimum: 0
+          example: 2
+          description: "Number of large jars (must be zero or a positive integer)"
+      required:
+        - deliveryDate
+        - smallJars
+        - mediumJars
+        - largeJars
+
+    JarOrderEditDto:
+      type: object
+      properties:
+        technicalId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+          description: "Unique technical ID for the order"
+        deliveryDate:
+          type: string
+          format: date
+          example: "2024-08-01"
+          description: "Updated delivery date"
+        smallJars:
+          type: integer
+          minimum: 0
+          example: 10
+          description: "Updated number of small jars"
+        mediumJars:
+          type: integer
+          minimum: 0
+          example: 5
+          description: "Updated number of medium jars"
+        largeJars:
+          type: integer
+          minimum: 0
+          example: 2
+          description: "Updated number of large jars"
+      required:
+        - technicalId
+        - deliveryDate
+        - smallJars
+        - mediumJars
+        - largeJars
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: "Unique order identifier"
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      required:
+        - orderId
+
+    BusinessErrorResponse:
+      type: object
+      properties:
+        reason:
+          type: string
+          example: "Order exceeds production capacity"
+        code:
+          type: string
+          example: "JAR_LIMIT_EXCEEDED"
+
+    NotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Order not found"
+
+    patchRequest:
+      type: array
+      items:
+        oneOf:
+          - additionalProperties: false
+            required:
+              - value
+              - op
+              - path
+            properties:
+              path:
+                description: A JSON Pointer path.
+                type: string
+              op:
+                description: The operation to perform.
+                type: string
+                enum:
+                  - add
+                  - replace
+                  - test
+              value:
+                description: The value to add, replace or test.
+          - additionalProperties: false
+            required:
+              - op
+              - path
+            properties:
+              path:
+                description: A JSON Pointer path.
+                type: string
+              op:
+                description: The operation to perform.
+                type: string
+                enum:
+                  - remove
+          - additionalProperties: false
+            required:
+              - from
+              - op
+              - path
+            properties:
+              path:
+                description: A JSON Pointer path.
+                type: string
+              from:
+                description: A JSON Pointer path.
+                type: string
+              op:
+                description: The operation to perform.
+                type: string
+                enum:
+                  - move
+                  - copy

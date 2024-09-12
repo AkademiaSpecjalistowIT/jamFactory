@@ -14,8 +14,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("api/v1")
-public class JamController implements JamsApi {
+public class JamController implements ApiApi {
     private final JamPlanProductionService jamPlanProductionService;
 
     @Override

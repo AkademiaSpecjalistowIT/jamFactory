@@ -111,6 +111,7 @@
                 <version>7.8.0</version>
                 <executions>
                     <execution>
+                        <id>jam_api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -119,6 +120,30 @@
                             <generatorName>spring</generatorName>
                             <apiPackage>pl.akademiaspecjalistowit.jamfactory.controller</apiPackage>
                             <modelPackage>pl.akademiaspecjalistowit.jamfactory.model</modelPackage>
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <configOptions>
+                                <additionalModelTypeAnnotations>
+                                    <!--                                    @lombok.Builder-->
+                                    <!--                                    @lombok.AllArgsConstructor-->
+                                    <!--                                    @lombok.NoArgsConstructor-->
+                                    @lombok.Getter
+                                </additionalModelTypeAnnotations>
+                                <useJakartaEe>true</useJakartaEe>
+                                <interfaceOnly>true</interfaceOnly>
+                                <delegatePattern>false</delegatePattern>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jar_api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/contract/openapi_jarfactory.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>pl.akademiaspecjalistowit.jarfactory.controller</apiPackage>
+                            <modelPackage>pl.akademiaspecjalistowit.jarfactory.model</modelPackage>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                             <configOptions>
                                 <additionalModelTypeAnnotations>
