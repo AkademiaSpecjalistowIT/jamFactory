@@ -1,4 +1,4 @@
-package pl.akademiaspecjalistowit.jamfactory.dto;
+package pl.akademiaspecjalistowit.jamfactory.model;
 
 import org.junit.jupiter.api.Test;
 

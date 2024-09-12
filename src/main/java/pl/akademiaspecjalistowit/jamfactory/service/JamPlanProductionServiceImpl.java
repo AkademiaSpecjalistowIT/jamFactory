@@ -5,18 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionRequestDto;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamListPlanProductionResponseDto;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamPlanProductionResponseDto;
-import pl.akademiaspecjalistowit.jamfactory.dto.JarOrderRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
+import pl.akademiaspecjalistowit.jamfactory.model.JamListPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,6 +47,23 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         createJarOrder(jamPlanProductionRequestDto);
         return entity.getPlanId();
     }
+
+//    @Override
+//    @Transactional
+//    public void addProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
+//        JamPlanProductionEntity entity =
+//                jamsMapper.toEntity(jamPlanProductionRequestDto, apiProperties.getMaxProductionLimit());
+//
+//        validateProductionPlan(jamPlanProductionRequestDto);
+//
+//        try {
+//            addNewProductionPlanForGivenDay(entity);
+//        } catch (ProductionException e) {
+//            log.info("Procesujemy dodanie planu prodyjnego na więcej niż 1 dzien, ponieważ : " + e.getMessage());
+//            addProductionPlanBeforeDeadline(entity);
+//        }
+//        createJarOrder(jamPlanProductionRequestDto);
+//    }
 
     @Override
     public JamListPlanProductionResponseDto getPlanProduction() {

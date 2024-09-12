@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
+import pl.akademiaspecjalistowit.jamfactory.model.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 
 class JamPlanProductionEntityFillProductionPlanTest {

@@ -81,16 +81,14 @@
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
-            <artifactId>openapi-generator-maven-plugin</artifactId>
-            <version>7.8.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
             <version>0.2.6</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.22</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -113,6 +111,7 @@
                 <version>7.8.0</version>
                 <executions>
                     <execution>
+                        <id>jam_api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -124,14 +123,38 @@
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                             <configOptions>
                                 <additionalModelTypeAnnotations>
-<!--                                    @lombok.Builder-->
-<!--                                    @lombok.AllArgsConstructor-->
-<!--                                    @lombok.NoArgsConstructor-->
+                                    <!--                                    @lombok.Builder-->
+                                    <!--                                    @lombok.AllArgsConstructor-->
+                                    <!--                                    @lombok.NoArgsConstructor-->
                                     @lombok.Getter
                                 </additionalModelTypeAnnotations>
                                 <useJakartaEe>true</useJakartaEe>
                                 <interfaceOnly>true</interfaceOnly>
-                                <delegatePattern>true</delegatePattern>
+                                <delegatePattern>false</delegatePattern>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jar_api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/contract/openapi_jarfactory.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>pl.akademiaspecjalistowit.jarfactory.controller</apiPackage>
+                            <modelPackage>pl.akademiaspecjalistowit.jarfactory.model</modelPackage>
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <configOptions>
+                                <additionalModelTypeAnnotations>
+                                    <!--                                    @lombok.Builder-->
+                                    <!--                                    @lombok.AllArgsConstructor-->
+                                    <!--                                    @lombok.NoArgsConstructor-->
+                                    @lombok.Getter
+                                </additionalModelTypeAnnotations>
+                                <useJakartaEe>true</useJakartaEe>
+                                <interfaceOnly>true</interfaceOnly>
+                                <delegatePattern>false</delegatePattern>
                             </configOptions>
                         </configuration>
                     </execution>

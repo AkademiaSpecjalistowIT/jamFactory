@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pl.akademiaspecjalistowit.jamfactory.dto.JamJars;
+import pl.akademiaspecjalistowit.jamfactory.model.JamJars;
 
 import java.time.LocalDate;
 import java.util.UUID;
