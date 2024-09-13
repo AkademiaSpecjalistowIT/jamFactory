@@ -5,7 +5,7 @@ databaseChangeLog:
       changes:
         - createTable:
             ifNotExists: true
-            tableName: jam_plans_production
+            tableName: production_table
             columns:
               - column:
                   name: id

@@ -1,23 +1,29 @@
+#server:
+#  port: 8101
 spring:
   application:
     name: jamFactory
 
   datasource:
+#    url: jdbc:postgresql://localhost:5433/jam_factory
     url: jdbc:postgresql://localhost:5440/jam_factory
     username: postgres
     password: admin
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.yaml
 limits:
   maxDeliveryCapacity: 15000
   maxProductionLimit: 2000
 
 jar-factory:
   paths:
+#    orders: http://localhost:8102/api/v1/jars/order
     orders: http://localhost:8081/api/v1/jars/order
