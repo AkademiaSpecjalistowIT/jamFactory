@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-jam-plan-production
+      author: Alena Iadkouskaya
+      changes:
+        - createTable:
+            ifNotExists: true
+            tableName: jam_plans_production
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: plan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  name: plan_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: small_jam_jars
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: medium_jam_jars
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: large_jam_jars
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: production_limit_in_kg
+                  type: INTEGER
+                  constraints:
+                    nullable: false
