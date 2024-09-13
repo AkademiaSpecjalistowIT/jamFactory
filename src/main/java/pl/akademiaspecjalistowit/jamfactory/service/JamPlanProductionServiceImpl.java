@@ -5,14 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.akademiaspecjalistowit.jamfactory.configuration.ApiProperties;
-import pl.akademiaspecjalistowit.jamfactory.model.JamJars;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
+import pl.akademiaspecjalistowit.jamfactory.exception.JamPlanProductionServiceException;
+import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
-import pl.akademiaspecjalistowit.jamfactory.model.JamListPlanProductionResponseDto;
-import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionRequestDto;
-import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionResponseDto;
-import pl.akademiaspecjalistowit.jamfactory.model.JarOrderRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.model.*;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
 import java.time.Duration;
@@ -29,7 +27,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
     private final JamsMapper jamsMapper;
     private final ApiProperties apiProperties;
     private final JarService jarService;
-
 
 
     @Override
@@ -149,7 +146,11 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
                 jamPlanProductionRequestDto.getSmallJamJars(), jamPlanProductionRequestDto.getMediumJamJars(),
                 jamPlanProductionRequestDto.getLargeJamJars());
 
-        UUID jarOrderRequestId = jarService.orderJars(jarOrderRequestDto);
+        try {
+            UUID jarOrderRequestId = jarService.orderJars(jarOrderRequestDto);
+        } catch (JarFactoryHttpClientException e) {
+            throw new JamPlanProductionServiceException("Failed to create jar order", e);
+        }
     }
 
     private void validateProductionPlan(JamPlanProductionRequestDto jamPlanProductionRequestDto) {
@@ -191,7 +192,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             throw new ProductionException(
                     "Przekraczajaca zdolnośc transportowa na period z " + today + " po " + checkUntilDate + ".");
         }
-
     }
 
     private List<LocalDate> createDaySequenceDescending(LocalDate today, LocalDate newProductionPlanDate) {
@@ -201,7 +201,6 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
             dates.add(today);
             today = today.plusDays(1);
         }
-
         return dates;
     }
 
@@ -225,5 +224,4 @@ public class JamPlanProductionServiceImpl implements JamPlanProductionService {
         return Duration.between(today.atStartOfDay(),
                 entity.getPlanDate().atStartOfDay()).toDays() + 1;
     }
-
 }
