@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import pl.akademiaspecjalistowit.jamfactory.exception.BusinessException;
+import pl.akademiaspecjalistowit.jamfactory.exception.JamPlanProductionServiceException;
 import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 
@@ -32,6 +33,12 @@ public class JamFactoryControllerAdvice {
     public ResponseEntity<RejectResponse> handleJarFactoryHttpClientException(JarFactoryHttpClientException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new RejectResponse(e.getMessage(), ErrorCode.INSUFFICIENT_JARS));
+    }
+
+    @ExceptionHandler(JamPlanProductionServiceException.class)
+    public ResponseEntity<RejectResponse> handleProductionException(JamPlanProductionServiceException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new RejectResponse(e.getMessage(), ErrorCode.JAM_PRODUCTION_LIMIT_EXCEEDED));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

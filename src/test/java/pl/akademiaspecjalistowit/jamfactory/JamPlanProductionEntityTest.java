@@ -10,8 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 class JamPlanProductionEntityTest {
-
-
     private JamController jamPlanProductionServiceImpl;
 
     @Test

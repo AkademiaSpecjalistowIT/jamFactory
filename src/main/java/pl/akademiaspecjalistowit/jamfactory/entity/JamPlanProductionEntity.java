@@ -52,7 +52,6 @@ public class JamPlanProductionEntity {
         this(planDate, null, null, null, productionLimitInKg);
     }
 
-
     public double getTotalJamWeight() {
         return (JarSizes.LARGE.value * largeJamJars) + (JarSizes.MEDIUM.value * mediumJamJars) + (JarSizes.SMALL.value * smallJamJars);
     }
@@ -110,18 +109,11 @@ public class JamPlanProductionEntity {
     }
 
     private int calculateJamJarsAmountToFit(JarSizes jarSizes) {
-////        double kgToFitInProductionPlan = 0;
-////        if (productionLimitInKg > 0) {
-//            double kgToFitInProductionPlan = productionLimitInKg - getTotalJamWeight();
-//        //}
-//        return (int) (kgToFitInProductionPlan / jarSizes.value);
-
         double kgToFitInProductionPlan = productionLimitInKg - getTotalJamWeight();
         return (int) (kgToFitInProductionPlan / jarSizes.value);
     }
 
     private enum JarSizes {
-
         LARGE(1),
         MEDIUM(0.5),
         SMALL(0.25);
