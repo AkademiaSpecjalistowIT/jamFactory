@@ -7,21 +7,24 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.TransactionSystemException;
+import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
+import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.model.JamListPlanProductionResponseDto;
 import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.model.JarOrderRequestDto;
-import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
-import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +43,8 @@ class JamPlanProductionServiceImplTest {
 
     @Autowired
     private JamPlanProductionRepository jamPlanProductionRepository;
-
+    @Autowired
+    private Environment environment;
     @AfterEach
     void tearDown() {
         jamPlanProductionRepository.deleteAll();
@@ -195,5 +199,10 @@ class JamPlanProductionServiceImplTest {
         assertThat(listPlanProduction.getSumLargeJamJars()).isEqualTo(200);
         assertThat(listPlanProduction.getListPlans().getFirst().getPlanDate()).isEqualTo(today);
         assertThat(listPlanProduction.getListPlans().get(1).getPlanDate()).isEqualTo(todayPlusSevenDays);
+    }
+    @Test
+    void testActiveProfile() {
+        String[] activeProfiles = environment.getActiveProfiles();
+        assertTrue(Arrays.asList(activeProfiles).contains("test"));
     }
 }
