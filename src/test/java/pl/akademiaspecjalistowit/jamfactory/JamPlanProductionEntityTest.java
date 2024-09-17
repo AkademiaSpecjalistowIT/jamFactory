@@ -1,7 +1,7 @@
 package pl.akademiaspecjalistowit.jamfactory;
 
 import org.junit.jupiter.api.Test;
-import pl.akademiaspecjalistowit.jamfactory.controller.JamFactoryController;
+import pl.akademiaspecjalistowit.jamfactory.controller.JamController;
 import pl.akademiaspecjalistowit.jamfactory.entity.JamPlanProductionEntity;
 
 import java.time.LocalDate;
@@ -10,9 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 class JamPlanProductionEntityTest {
-
-
-    private JamFactoryController jamPlanProductionServiceImpl;
+    private JamController jamPlanProductionServiceImpl;
 
     @Test
     void ShouldConvertAllJamJarsToWeightCorrectly() {
