@@ -31,7 +31,6 @@ public class JamJars {
         return amount;
     }
 
-
     public boolean isEmpty() {
         return smallJamJars + mediumJamJars + largeJamJars == 0;
     }
