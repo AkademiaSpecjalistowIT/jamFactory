@@ -10,14 +10,15 @@ import pl.akademiaspecjalistowit.jamfactory.exception.JamPlanProductionServiceEx
 import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 import pl.akademiaspecjalistowit.jamfactory.mapper.JamsMapper;
-import pl.akademiaspecjalistowit.jamfactory.model.*;
+import pl.akademiaspecjalistowit.jamfactory.model.JamListPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionRequestDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JamPlanProductionResponseDto;
+import pl.akademiaspecjalistowit.jamfactory.model.JarOrderRequestDto;
 import pl.akademiaspecjalistowit.jamfactory.repositories.JamPlanProductionRepository;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @AllArgsConstructor
 @Service
