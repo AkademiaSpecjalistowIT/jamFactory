@@ -36,4 +36,36 @@ class JamPlanProductionEntityFillProductionPlanTest {
         assertThat(jamPlanProductionEntityFilled.getTotalJamWeight()).isCloseTo(2000d, Offset.offset(0.24));
     }
 
+    @Test
+    void should_fill_JamPlanProductionEntity_firstly_large_jars() {
+        //given
+        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 2000);
+        JamJars jamJars = new JamJars(1000, 1000, 2000);
+
+        //when
+        JamPlanProductionEntity jamPlanProductionEntityFilled = jamPlanProductionEntity.fillProductionPlan(jamJars);
+
+        //then
+        assertThat(jamPlanProductionEntityFilled.getTotalJamWeight()).isEqualTo(2000);
+        assertThat(jamPlanProductionEntityFilled.getLargeJamJars()).isEqualTo(2000);
+        assertThat(jamPlanProductionEntityFilled.getMediumJamJars()).isEqualTo(0);
+        assertThat(jamPlanProductionEntityFilled.getSmallJamJars()).isEqualTo(0);
+    }
+
+    @Test
+    void should_fill_JamPlanProductionEntity_firstly_large_jars_secondly_medium_jars() {
+        //given
+        JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 2000);
+        JamJars jamJars = new JamJars(1000, 2000, 1500);
+
+        //when
+        JamPlanProductionEntity jamPlanProductionEntityFilled = jamPlanProductionEntity.fillProductionPlan(jamJars);
+
+        //then
+        assertThat(jamPlanProductionEntityFilled.getTotalJamWeight()).isEqualTo(2000);
+        assertThat(jamPlanProductionEntityFilled.getLargeJamJars()).isEqualTo(1500);
+        assertThat(jamPlanProductionEntityFilled.getMediumJamJars()).isEqualTo(1000);
+        assertThat(jamPlanProductionEntityFilled.getSmallJamJars()).isEqualTo(0);
+    }
+
 }
