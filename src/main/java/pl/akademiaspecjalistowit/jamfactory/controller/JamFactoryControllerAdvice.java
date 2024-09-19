@@ -9,16 +9,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import pl.akademiaspecjalistowit.jamfactory.exception.BusinessException;
-import pl.akademiaspecjalistowit.jamfactory.exception.JamPlanProductionServiceException;
-import pl.akademiaspecjalistowit.jamfactory.exception.JarFactoryHttpClientException;
-import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
+import pl.akademiaspecjalistowit.jamfactory.exception.*;
 
 @ControllerAdvice
 public class JamFactoryControllerAdvice {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<RejectResponse> handleBusinessException(BusinessException e) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new RejectResponse(e.getMessage(), ErrorCode.BUSINESS_ERROR));
+    }
+
+    @ExceptionHandler(JamJarsException.class)
+    public ResponseEntity<RejectResponse> handleJamJarsException(JamJarsException e) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new RejectResponse(e.getMessage(), ErrorCode.BUSINESS_ERROR));
     }
@@ -46,15 +49,6 @@ public class JamFactoryControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new RejectResponse(ex.getMessage(), ErrorCode.PRECONDITION_FAILED));
     }
-
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public ResponseEntity<RejectResponse> handleConstraintViolationException(ConstraintViolationException e) {
-//        String errors = e.getConstraintViolations().stream()
-//                .map(error -> error.getMessageTemplate())
-//                .collect(Collectors.joining("\n"));
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(new RejectResponse(errors, ErrorCode. PRECONDITION_FAILED));
-//    }
 
     @Getter
     @Setter
