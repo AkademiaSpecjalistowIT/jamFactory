@@ -1,8 +1,12 @@
 package pl.akademiaspecjalistowit.jamfactory.model;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import pl.akademiaspecjalistowit.jamfactory.exception.JamJarsException;
+import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JamJarsTest {
 
@@ -70,6 +74,32 @@ class JamJarsTest {
 
         //then
         assertThat(borrowedMedium).isEqualTo(500);
+    }
+
+    @Test
+    void should_throw_exception_when_small_jars_less_than_zero() {
+        //given&when
+        Executable e = () -> new JamJars(-20, 0, 0);
+
+        //then
+        assertThrows(JamJarsException.class, e);
+    }
+    @Test
+    void should_throw_exception_when_medium_jars_less_than_zero() {
+        //given&when
+        Executable e = () -> new JamJars(0, -10, 0);
+
+        //then
+        assertThrows(JamJarsException.class, e);
+    }
+
+    @Test
+    void should_throw_exception_when_large_jars_less_than_zero() {
+        //given&when
+        Executable e = () -> new JamJars(0, 0, -5);
+
+        //then
+        assertThrows(JamJarsException.class, e);
     }
 
 }
