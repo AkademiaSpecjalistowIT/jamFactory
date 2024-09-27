@@ -93,6 +93,24 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.0</version> <!-- Или любая стабильная версия -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -144,7 +162,8 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/contract/openapi_jarfactory.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/contract/openapi_jarfactory.yaml
+                            </inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>pl.akademiaspecjalistowit.jarfactory.controller</apiPackage>
                             <modelPackage>pl.akademiaspecjalistowit.jarfactory.model</modelPackage>
