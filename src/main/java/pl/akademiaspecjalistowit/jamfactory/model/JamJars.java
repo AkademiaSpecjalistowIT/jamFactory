@@ -38,6 +38,9 @@ public class JamJars {
     }
 
     public Integer borrowLarge(Integer amount) {
+        if(amount<0){
+            throw new JamJarsException("Wartości nie mogą być niegatywne!!!");
+        }
         if (amount >= this.largeJamJars) {
             return this.largeJamJars;
         }
