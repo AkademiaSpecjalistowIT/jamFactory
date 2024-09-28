@@ -1,6 +1,8 @@
 package pl.akademiaspecjalistowit.jamfactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import org.assertj.core.data.Offset;
@@ -68,4 +70,29 @@ class JamPlanProductionEntityFillProductionPlanTest {
         assertThat(jamPlanProductionEntityFilled.getSmallJamJars()).isEqualTo(0);
     }
 
+    @Test
+    public void test_production_within_limit() {
+        // GIVEN
+        JamPlanProductionEntity productionPlan = new JamPlanProductionEntity(LocalDate.now(), 2000);
+        JamJars jamJars = new JamJars(500, 1000, 1000);
+
+        // WHEN
+        JamPlanProductionEntity jamPlanProductionEntity = productionPlan.fillProductionPlan(jamJars);
+
+        // THEN
+        assertThat(jamPlanProductionEntity.getTotalJamWeight()).isLessThan(2000);
+    }
+
+    @Test
+    public void test_production_exceeds_limit() {
+        // GIVEN
+        JamPlanProductionEntity productionPlan = new JamPlanProductionEntity(LocalDate.now(), 2000);
+        JamJars jamJars = new JamJars(5000, 5000, 5000);
+
+        // WHEN
+        JamPlanProductionEntity jamPlanProductionEntity = productionPlan.fillProductionPlan(jamJars);
+
+        // THEN
+        assertThat(jamPlanProductionEntity.getTotalJamWeight()).isEqualTo(2000);
+    }
 }
