@@ -70,7 +70,7 @@ class JamPlanProductionEntityFillProductionPlanTest {
     }
 
     @Test
-    void should_fill_JamPlanProductionEntity_firstly_large_jars_secondly_medium_jars_and_thirst_small_jars() {
+    void should_fill_JamPlanProductionEntity_firstly_large_jars_secondly_medium_jars_and_thirdly_small_jars() {
         //given
         JamPlanProductionEntity jamPlanProductionEntity = new JamPlanProductionEntity(LocalDate.now(), 2000);
         JamJars jamJars = new JamJars(7000, 500, 500);
