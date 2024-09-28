@@ -6,6 +6,7 @@ import pl.akademiaspecjalistowit.jamfactory.exception.JamJarsException;
 import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JamJarsTest {
@@ -102,4 +103,63 @@ class JamJarsTest {
         assertThrows(JamJarsException.class, e);
     }
 
+    @Test
+    public void should_throw_exceptions_when_borrowSmall_have_negative_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Executable e = () -> jamJars.borrowSmall(-1);
+
+        //THEN
+        assertThrows(JamJarsException.class, e);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowSmall_is_null() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Executable e = () -> jamJars.borrowSmall(null);
+
+        //THEN
+        assertThrows(NullPointerException.class, e);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowSmall_have_larger_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowSmall = jamJars.borrowSmall(11);
+
+        //THEN
+        assertThat(borrowSmall).isEqualTo(10);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowSmall_have_smaller_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowSmall = jamJars.borrowSmall(9);
+
+        //THEN
+        assertThat(borrowSmall).isEqualTo(9);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowSmall_have_equals_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowSmall = jamJars.borrowSmall(10);
+
+        //THEN
+        assertThat(borrowSmall).isEqualTo(10);
+    }
 }
