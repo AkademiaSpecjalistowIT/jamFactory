@@ -102,6 +102,51 @@ class JamJarsTest {
         //then
         assertThrows(JamJarsException.class, e);
     }
+    @Test
+    public void should_throw_exceptions_when_borrowLarge_have_negative_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Executable e = () -> jamJars.borrowMedium(-1);
+
+        //THEN
+        assertThrows(JamJarsException.class, e);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowMedium_is_null() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+    @Test
+    public void should_throw_exceptions_when_borrowLarge_have_negative_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Executable e = () -> jamJars.borrowLarge(-1);
+
+        //THEN
+        assertThrows(JamJarsException.class, e);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowLarge_is_null() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Executable e = () -> jamJars.borrowLarge(null);
+
+        //THEN
+        assertThrows(NullPointerException.class, e);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowLarge_have_larger_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
 
     @Test
     public void should_throw_exceptions_when_borrowSmall_have_negative_value() {
@@ -161,5 +206,77 @@ class JamJarsTest {
 
         //THEN
         assertThat(borrowSmall).isEqualTo(10);
+    }
+        //WHEN
+        Integer borrowLarge = jamJars.borrowLarge(11);
+
+        //THEN
+        assertThat(borrowLarge).isEqualTo(10);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowLarge_have_smaller_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowLarge = jamJars.borrowLarge(9);
+
+        //THEN
+        assertThat(borrowLarge).isEqualTo(9);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowLarge_have_equals_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowLarge = jamJars.borrowLarge(10);
+
+        //THEN
+        assertThat(borrowLarge).isEqualTo(10);
+    }
+        //WHEN
+        Executable e = () -> jamJars.borrowMedium(null);
+
+        //THEN
+        assertThrows(NullPointerException.class, e);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowMedium_have_larger_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowMedium = jamJars.borrowMedium(11);
+
+        //THEN
+        assertThat(borrowMedium).isEqualTo(10);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowMedium_have_smaller_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowMedium = jamJars.borrowMedium(9);
+
+        //THEN
+        assertThat(borrowMedium).isEqualTo(9);
+    }
+
+    @Test
+    public void should_throw_exceptions_when_borrowMedium_have_equals_value() {
+        //GIVEN
+        JamJars jamJars = new JamJars(10, 10, 10);
+
+        //WHEN
+        Integer borrowMedium = jamJars.borrowMedium(10);
+
+        //THEN
+        assertThat(borrowMedium).isEqualTo(10);
     }
 }
