@@ -24,6 +24,9 @@ public class JamJars {
     }
 
     public Integer borrowMedium(Integer amount) {
+        if (amount < 0) {
+            throw new JamJarsException("Wartości nie mogą być niegatywne!!!");
+        }
         if (amount >= this.mediumJamJars) {
             return mediumJamJars;
         }
@@ -31,6 +34,9 @@ public class JamJars {
     }
 
     public Integer borrowSmall(Integer amount) {
+        if(amount<0){
+            throw new JamJarsException("Wartości nie mogą być niegatywne!!!");
+        }
         if (amount >= this.smallJamJars) {
             return this.smallJamJars;
         }
@@ -38,6 +44,9 @@ public class JamJars {
     }
 
     public Integer borrowLarge(Integer amount) {
+        if(amount<0){
+            throw new JamJarsException("Wartości nie mogą być niegatywne!!!");
+        }
         if (amount >= this.largeJamJars) {
             return this.largeJamJars;
         }
