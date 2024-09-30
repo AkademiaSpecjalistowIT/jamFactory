@@ -2,8 +2,9 @@ package pl.akademiaspecjalistowit.jamfactory.model;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import pl.akademiaspecjalistowit.jamfactory.exception.JamJarsException;
-import pl.akademiaspecjalistowit.jamfactory.exception.ProductionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,6 +101,24 @@ class JamJarsTest {
 
         //then
         assertThrows(JamJarsException.class, e);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0, 0, 0, true",
+            "10, 10, 10, false",
+            "0, 10, 0, false",
+            "0, 0, 10, false",
+            "10, 20, 0, false",
+            "10, 0, 30, false",
+            "0, 20, 30, false",
+            "10, 0, 0, false"})
+    void should_return_true_for_correct_data_JamJars(Integer small, Integer medium, Integer large, boolean expected) {
+        //given
+        JamJars jamJars = new JamJars(small, medium, large);
+        //when
+        boolean isEmpty = jamJars.isEmpty();
+        //then
+        assertThat(isEmpty).isEqualTo(expected);
     }
 
     @Test
